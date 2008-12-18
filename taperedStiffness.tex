@@ -1,0 +1,92 @@
+\documentclass[12pt]{report}
+\usepackage{sagetex}
+\usepackage{soto}
+
+\begin{document}
+
+\begin{sagesilent}
+var('b b1 b2 d x L gamma alpha') 	# dimensions of beam
+var('I')      	     				# moment of inertia
+var('E')							# young's modulus
+var('q')							# load
+var('c1 c2 c3')						# constants of integration
+var('cc1 cc2 cc3')					# solved constants of integration
+var('cond1 cond2 cond3')			# equations for constants
+var('m')
+bx = alpha*(x+gamma)				# thickness as function of x with alpha and gamma
+I = b*d^3/12
+Ix = I.substitute(d = alpha*(x+gamma))
+f2 = (integral(-q,x)+c1)/E/Ix
+f1 = integral(f2,x) + c2
+f = integral(f1,x) + c3
+f = f.simplify_full()
+cond1 = solve(f2.substitute(x=L),c1)
+cond2 = solve(f1.substitute(x=0),c2)
+cond3 = solve(f.substitute(x=0),c3)
+cc1=cond1[0].rhs() # get value from solution
+cc2=cond2[0].rhs()
+cc3=cond3[0].rhs()
+f = f.substitute(c3=cc3)
+f = f.substitute(c2=cc2)
+f = f.substitute(c1=cc1)
+#f = f.simplify_log()
+f = f.simplify_rational()
+f = f.factor()
+
+#f = f.substitute(gamma = 3*L)
+fdisp = f.substitute(x=L)
+alpha = (b2-b1)/L
+gamma = b1/alpha
+\end{sagesilent}
+
+The moment of inertia is 
+$$I=\sage{I}$$
+
+Our beam is a tapered beam starting at $b_1$ at the base, narrowing to
+$b_2$ at the tip. We express the thickness taper as the function
+$$ b = \sage{b1*(1-x/L) + b2*x/L }$$
+$$ b = \sage{b1-(b1-b2)/L*x} $$
+
+If we make the substitutions $\ga=\sage{alpha}$ and $\gg=\sage{gamma}$,
+we can express the thickness function as 
+$$ b = \sage{bx}$$
+
+Substituting in our expression for $d$ we have
+$$I(x)=\sage{Ix}$$
+
+The beam equation for load is given by
+$$ \frac{d^2}{dx^2}\lp E I \frac{d^2y}{dx^2} \rp = q $$
+
+The integral of this equation expresses the shear
+$$ \frac{d}{dx} \lp EI\frac{d^2y}{dx^2} \rp = V = -q $$
+
+The equation expressing the moment is 
+$$y''=\sage{f2}$$
+
+The equation expressing the slope is 
+$$y'=\sage{f1}$$
+
+Finally, then the equation expressing the displacement of the beam is given by
+$$y=\sage{f}$$
+
+We solve for the boundary conditions and get the following constants
+
+$$\sage{cond1[0]}$$
+$$\sage{cond2[0]}$$
+$$\sage{cond3[0]}$$
+
+We substitute the integration constants and get the following function for the shape
+of the beam
+$$y(x)=\sage{f}$$
+
+$$\frac{6 q}{{{{{\alpha}^{3}  b} E} {\gg}^{2} } ( \gg + x )} 
+{{ \lp ({{2 {\gg}^{3} + {{2 x} {\gg}^{2}) } \log \lp \frac{ \gg + x }{\gg}\rp} } 
+- {{2 x}{\gg}^{2} } - {{x}^{2}  \gg} + {{x}^{2}  L} \rp}}{}$$
+
+
+To find the displacement at the tip, we substitute $L$ for $x$ in the equation and get
+$$y(L)=\sage{fdisp}$$
+
+$$y(L)=\sage{factor(fdisp)}$$
+
+\end{document}
