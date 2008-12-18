@@ -1,8 +1,6 @@
 # variable declarations
 var('w')		# width of wedge
-var('b1')		# thickness at base of wedge
-var('b2')		# thickness at tip of wedge
-var('b')		# thickness at arbitrary point on wedge
+var('b')		# thickness at base of wedge
 var('bx')		# thickness as function of x
 var('L')		# length of wedge
 var('gamma')	# scaled intercept of wedge function
@@ -45,15 +43,18 @@ f = f.substitute(c1=cc1)
 
 print('shape function particular solution')
 print(f)
-show(f)
+#show(f)
 
 f = f.substitute(x=L)
-alphasub = (b2-b1)/L
-gammasub = b1*L/(b2-b1)
+alphasub = b*(a-1)/L
+gammasub = L/(a-1)
 f = f.substitute(gamma = gammasub,alpha=alphasub)
-f = f.substitute(b2 = a*b1)
+
 
 print('shape function with b1 b2 substitutions and simplified')
 f=f.simplify_rational()
 print(f)
-show(f)
+#show(f)
+
+simple = limit(f,a=1)
+print(simple)
