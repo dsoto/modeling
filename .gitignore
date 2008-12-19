@@ -1,3 +1,5 @@
 *.sout
 *~
 *.pyc
+*.aux
+*.log
