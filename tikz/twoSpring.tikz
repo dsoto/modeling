@@ -1,0 +1,12 @@
+\begin{center}
+\begin{tikzpicture}
+\tikzstyle{rectfill} = [color=black!50,draw=black]
+\tikzstyle{mycoil} = [decorate,decoration={coil,segment length=0.1cm,amplitude=0.2cm}]
+\draw[step=1.0cm,color=black!20] (-3,-1) grid (3,5);
+\draw[mycoil] (0,0) -- (0,1); 
+\draw[mycoil] (0,1.5) -- (0,2.5); 
+\filldraw[rectfill]  (-2,1.5) rectangle (2,1.0);
+\filldraw[rectfill] (-2,2.5) rectangle (2,3.0);
+\end{tikzpicture}
+\end{center}
+
