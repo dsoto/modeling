@@ -1,0 +1,66 @@
+% taperedBeam.tikz
+
+\begin{tikzpicture}[>=latex]
+\tikzstyle{bluefill} = [fill=blue!20,fill opacity=0.8,draw=black]
+\tikzstyle{sidefill} = [fill=blue!50,fill opacity=0.8,draw=black]
+\tikzstyle{ann} = [fill=white,inner sep=1pt]
+%% define dimensions
+\def\a{0.2}		%
+\def\b{1.5}		%
+\def\l{4.0}		% length of beam
+\def\d{0.2}		% beam displacement
+\def\cx{2.0*\d}
+\def\cy{6.0*\d}
+\def\ccx{-\b/2*\ccf}
+\def\ccy{\ccf}
+\def\s{-0.35}	% spacing for dimension annotations
+\def\w{1.0}		% width of beam
+\def\wx{\w/4}	% offset to represent 3D perspective
+\def\wy{\w/4}	% offset to represent 3D perspective
+
+\filldraw[bluefill]
+(-\b/2,0) -- (-\b*\a/2,\l) -- (\b*\a/2,\l) -- (\b/2,0) -- cycle;
+% side face
+\filldraw[sidefill]
+(\b/2,0) -- (\b/2+\wx,\wy) -- (\a*\b/2+\wx,\l+\wy) -- (\a*\b/2,\l) -- cycle;
+% top face
+\filldraw[sidefill]
+(\a*\b/2+\wx,\l+\wy) -- (-\a*\b/2+\wx,\l+\wy) -- 
+(-\a*\b/2,\l) -- (\a*\b/2,\l) -- cycle;
+
+
+
+\begin{scope}[xshift=100]
+\filldraw[bluefill]
+(-\b/2,0) .. controls (-\b*\a/2+\d-\cx,\l-\cy) .. (-\b*\a/2+\d,\l) 
+-- (\b*\a/2+\d,\l) .. controls (\b*\a/2+\d-\cx,\l-\cy) ..(\b/2,0) 
+-- cycle;
+% side face
+\filldraw[sidefill]
+(\b/2,0) 
+-- (\b/2+\wx,\wy) .. controls (\a*\b/2+\wx+\d-\cx,\l+\wy-\cy) .. (\a*\b/2+\d+\wx,\l+\wy) 
+-- (\a*\b/2+\d,\l) .. controls (\a*\b/2+\d-\cx,\l-\cy) .. (\b/2,0);
+% top face
+\filldraw[sidefill]
+(\a*\b/2+\wx+\d,\l+\wy) -- (-\a*\b/2+\wx+\d,\l+\wy) -- 
+(-\a*\b/2+\d,\l) -- (\a*\b/2+\d,\l) -- cycle;
+=\end{scope}
+%% draw load
+%\draw [<-] (\a*\b/2+\wx/2,\l+\wy/2) -- (\a*\b/2+\wx/2+1,\l+\wy/2) node[anchor=west] {$q$};
+%% length dimension annotation
+%\draw[|<->|] (-\b,0) -- node [ann] {$l$} (-\b,\l);
+%% base dimension annotation
+%\draw[|<->|] (-\b/2,-0.25) -- node [ann] {$b$} (\b/2,-0.25);
+%% tip dimension
+%\draw[->|](-\b/2,\l+\s) -- (-\a*\b/2,\l+\s);
+%\draw[->|](\b/2,\l+\s) -- (\a*\b/2,\l+\s);
+%\node[] at (0,\l+\s) {$ab$};
+%% draw x axis
+%\draw[->]  (0,0) -- (0,\l/3) node[anchor=south] {$x$};
+%
+%% try bent face
+%\filldraw[bluefill]
+%(-\b/2,0) -- (-\b*\a/2,\l) -- (\b*\a/2,\l) -- (\b/2,0) -- cycle;
+%
+%
+\end{tikzpicture}
