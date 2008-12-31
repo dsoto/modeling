@@ -1,2 +1,25 @@
-% dacBlockDiagram.tikz
+\usetikzlibrary{shadows}
+\begin{tikzpicture}[
+	>=latex,
+	node distance=3.5cm,
+	block/.style={rectangle,
+				  draw,
+				  fill=blue!20,
+				  minimum size=1.5cm,
+				  drop shadow}]
 
+    \node [block]		       			(cantilever)   	{Cantilever};
+    \node [block, below of=cantilever] 	(DUT)	       	{DUT};
+    \node [block, right of=cantilever] 	(piezo)	       	{Piezo Positioner};
+    \node [block, below of=piezo]		(wheatstone) 	{Wheatstone};
+    \node [block, right of=piezo]		(PI) 			{PI};
+    \node [block, below of=PI] 			(breakout) 		{NI Breakout Box};
+    \node [block, below of=breakout] 	(PC) 			{PC};
+    
+    \path (cantilever) 	edge [-]    (piezo);
+    \path (cantilever) 	edge [->]   (wheatstone);
+    \path (PI)      	edge [<->]   (breakout);
+    \path (PI)			edge [<->]   (piezo);
+    \path (wheatstone)	edge [->]   (breakout);
+    \path (PC)			edge [<->]	(breakout);
+\end{tikzpicture}

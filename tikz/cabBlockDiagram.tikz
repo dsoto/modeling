@@ -1,0 +1,25 @@
+\usetikzlibrary{shadows}
+\begin{tikzpicture}[
+	>=latex,
+	node distance=5cm,
+	block/.style={rectangle,
+				  draw,
+				  fill=blue!20,
+				  minimum size=1.5cm,
+				  drop shadow}]
+
+    \node [block]		       			(substrate)   	{Substrate};
+    \node [block, below of=substrate] 	(DUT)	       	{DUT};
+    \node [block, below of=DUT]		 	(forcePlate)   	{Force Plate};
+    \node [block, right of=substrate] 	(stage)	       	{XYZ Stepper Stages};
+    \node [block, below of=stage]		(conditioning) 	{Signal Conditioning};
+    \node [block, right of=stage]		(pic) 			{$\mu$Controller};
+    \node [block, below of=pic] 	(PC) 			{PC};
+    
+    \path (substrate) 	edge [-]    (stage);
+    \path (pic)      	edge [<->]   (PC);
+	\path (stage)		edge [->]	(PC);
+    \path (pic)			edge [->]   (stage);
+    \path (conditioning)	edge [->]   (PC);
+    \path (forcePlate)	edge [->]	(conditioning);
+\end{tikzpicture}
