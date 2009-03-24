@@ -12,53 +12,40 @@ import matplotlib.pyplot as mpl
 # seed random number generator
 
 # number of frequency components
-N = 200
+N = 50
 # scaling exponent
 p = 0.9
+# top of plot
+plotTop = 6
+# plot separation between surfaces
+plotSep = 2
 
 # create vector of random phases
 nr.seed(1)
 phase = nr.rand(N)
 
+# initialize data arrays
 x = np.linspace(0,2*3.14,5000)
-#y = np.sin(x + phase[0])
-y = np.zeros(len(x))
-for i in range(N):
+y = np.zeros((N+1,len(x)))
+# offset surface from zero
+y = y + 2
+
+# create surface for each of i frequency components
+for i in range(1,N+1):
     if i//2 == 1:
-        y = y + 1/(i+1)**p*np.sin((i+1)*x + 2*3.14*phase[i])
+        y[i] = y[i-1] + 1/(i+1)**p*np.sin((i+1)*x + 2*3.14*phase[i-1])
     else:
-        y = y - 1/(i+1)**p*np.sin((i+1)*x + 2*3.14*phase[i])
+        y[i] = y[i-1] - 1/(i+1)**p*np.sin((i+1)*x + 2*3.14*phase[i-1])
 
-y = y + 4
-
-# turn off axes and grid
-#mpl.plot(x,y)
-mpl.fill_between(x,y,y2=0)
-mpl.show()
-
-'''
-y = 0;
-x = 0:.001:2*3.14;
-rand('state',0);
-phase = 2*3.14*rand([1,N]);
-
-for i = 1:N
-	y = y + 1/i^(.7)*sin(i*x + phase(i));
-	if i==round(N/2) y2=y+2; end
-	if i==round(N/4) y4=y+4; end
-	if i==round(N/8) y8=y+6; end
-	
-end
-
-y9=zeros(1,length(x))+9;
-
-hold off
-plot (x,y,'k')
-axis([0,2*3.14,-10,12])
-hold on
-plot (x,y2,'k')
-plot (x,y4,'k')
-plot (x,y8,'k')
-plot (x,y9,'k')
-
-'''
+# generate plots
+for i in range(N+1):
+    thisPlotSep = plotSep - (plotSep - 0.5) * i / N
+    mpl.fill_between(x, y[i]+thisPlotSep, plotTop, color = 'b')
+    mpl.fill_between(x, y[N-1], 0, color = 'r')
+    fileName = 'plot' + str(i) + '.png'
+    mpl.axis([0, 6, 0, plotTop])
+    ax = mpl.gca()
+    ax.frame.set_visible(False)
+    mpl.savefig(fileName)
+    mpl.close()
+    
