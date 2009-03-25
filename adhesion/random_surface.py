@@ -8,6 +8,7 @@ of an adhesive material to that surface
 import numpy             as np
 import numpy.random      as nr
 import matplotlib.pyplot as mpl
+import os
 
 # seed random number generator
 
@@ -39,13 +40,15 @@ for i in range(1,N+1):
 
 # generate plots
 for i in range(N+1):
+    fileName = 'plot' + '%02d'%(i) + '.png'
+    print 'generating figure ' + fileName
     thisPlotSep = plotSep - (plotSep - 0.5) * i / N
-    mpl.fill_between(x, y[i]+thisPlotSep, plotTop, color = 'b')
-    mpl.fill_between(x, y[N-1], 0, color = 'r')
-    fileName = 'plot' + str(i) + '.png'
-    mpl.axis([0, 6, 0, plotTop])
-    ax = mpl.gca()
-    ax.frame.set_visible(False)
-    mpl.savefig(fileName)
+    fig = mpl.figure()
+    fig.set_size_inches((8,1.5))
+    ax = fig.add_subplot(111)
+    ax.fill_between(x, y[i]+thisPlotSep, plotTop, color = 'b')
+    ax.fill_between(x, y[N-1], 0, color = 'r')
+    ax.axis([0, 6, 0, plotTop])
+    ax.set_axis_off()
+    fig.savefig(fileName)
     mpl.close()
-    
