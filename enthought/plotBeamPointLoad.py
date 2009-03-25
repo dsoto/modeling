@@ -68,7 +68,6 @@ class taperedBeam(ta.HasTraits):
                        tua.Item(name = 'load'),
                        tua.Item(name = 'width'),
                        tua.Item(name = 'length'),
-                       tua.Item(name = 'moment'),
                        tua.Item(name = 'loadPoint'),
                        tua.Item(name = 'modulus'))
                        
