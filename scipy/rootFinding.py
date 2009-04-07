@@ -25,3 +25,10 @@ secondArgument = 2.0
 ans = spop.fsolve(myfun, guess, secondArgument)
 print ans
 
+# now solve for vector of y values
+# could use list or array
+
+guess = [0,0]
+secondArgument = [0,1]
+ans = spop.fsolve(myfun, guess, secondArgument)
+print ans
