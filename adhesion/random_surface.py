@@ -30,11 +30,8 @@ y = np.zeros((N+1,len(x)))
 # offset surface from zero
 y = y + 2
 # initialize energy arrays
-surfaceEnergy     = np.zeros((N+1,len(x)))
-deformationEnergy = np.zeros((N+1,len(x)))
-totalEnergy       = np.zeros((N+1,len(x)))
 
-# create surfaces
+# create random adhesive and substrate surfaces
 for i in range(1,N+1):
     # create surface from each of i frequency components
     # using series of sines with random phase
@@ -43,21 +40,27 @@ for i in range(1,N+1):
     else:
         y[i] = y[i-1] - 1/(i+1)**p*np.sin((i+1)*x + 2*3.14*phase[i-1])
 
-    # create plot for energy balance
-    surfaceEnergy[i] = -0.5 * x
-    deformationEnergy[i] = 0.5 * (N+1-i) / (N+1) * x**2
-    totalEnergy[i] = surfaceEnergy[i] + deformationEnergy[i]
 
-# create plots for i=0 case
-surfaceEnergy[0] = -0.5 * x
-deformationEnergy[0] = 0.5 * x**2
-totalEnergy[0] = surfaceEnergy[0] + deformationEnergy[0]
-
+# create data for energy balance
 yMin = -3
 yMax = 3
 xMin = 0
-xMax = 8
-numPoints = 10
+xMax = 10
+numPoints = 100
+xEnergy = np.linspace(xMin, xMax, numPoints)
+surfaceEnergy     = np.zeros((N+1,len(xEnergy)))
+deformationEnergy = np.zeros((N+1,len(xEnergy)))
+totalEnergy       = np.zeros((N+1,len(xEnergy)))
+for i in range(N+1):
+    # create plot for energy balance
+    surfaceEnergy[i] = -0.3 * xEnergy
+    deformationEnergy[i] = 0.5 * (N+1-i) / (N+1) * xEnergy**2
+    totalEnergy[i] = surfaceEnergy[i] + deformationEnergy[i]
+
+grey        = (0.5,0.5,0.5)
+topColor    = (0.5,0.5,1.0)
+bottomColor = (0.5, 0.5, 0.5)
+
 # generate plots
 for i in range(N+1):
     fileName = 'plot' + '%02d'%(i) + '.png'
@@ -68,23 +71,28 @@ for i in range(N+1):
     # surface plot
     ax = fig.add_subplot(211)
     # deformed adhesive
-    ax.fill_between(x, y[i]+thisPlotSep, plotTop, color = 'b')
+    ax.fill_between(x, y[i]+thisPlotSep, plotTop, color = topColor)
     # rough substrate
-    ax.fill_between(x, y[N-1], 0, color = 'r')
+    ax.fill_between(x, y[N-1], 0, color = bottomColor)
     ax.axis([0, 6, 0, plotTop])
     ax.set_axis_off()
     # energy plot
     ax = fig.add_subplot(212)
-    ax.plot(x, surfaceEnergy[i],     label='Surface Energy')
-    ax.plot(x, deformationEnergy[i], label='Deformation Energy')
-    ax.plot(x, totalEnergy[i],       label='Total Energy')
+    ax.plot(xEnergy, surfaceEnergy[i],     
+            label='Surface Energy',
+            color='k')
+    ax.plot(xEnergy, deformationEnergy[i], 
+            label='Deformation Energy',
+            color=topColor)
+    ax.plot(xEnergy, totalEnergy[i],       
+            label='Total Energy',
+            color='green')
     # find min of total energy
     # plot grey line horizontal and vertical through min
-    energyMinX = x[np.argmin(totalEnergy[i])]
+    energyMinX = xEnergy[np.argmin(totalEnergy[i])]
     energyMinY = np.min(totalEnergy[i])
     plotMinX = np.linspace(xMin, xMax, numPoints)
     plotMinY = energyMinY * np.ones(numPoints)
-    grey=(0.5,0.5,0.5)
     ax.plot(plotMinX, plotMinY, color=grey)
     plotVertX = energyMinX * np.ones(numPoints)
     plotVertY = np.linspace(yMin, yMax, numPoints)
