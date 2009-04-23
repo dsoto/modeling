@@ -34,6 +34,7 @@ surfaceEnergy     = np.zeros((N+1,len(x)))
 deformationEnergy = np.zeros((N+1,len(x)))
 totalEnergy       = np.zeros((N+1,len(x)))
 
+# create surfaces
 for i in range(1,N+1):
     # create surface from each of i frequency components
     # using series of sines with random phase
@@ -52,6 +53,11 @@ surfaceEnergy[0] = -0.5 * x
 deformationEnergy[0] = 0.5 * x**2
 totalEnergy[0] = surfaceEnergy[0] + deformationEnergy[0]
 
+yMin = -3
+yMax = 3
+xMin = 0
+xMax = 8
+numPoints = 10
 # generate plots
 for i in range(N+1):
     fileName = 'plot' + '%02d'%(i) + '.png'
@@ -76,15 +82,15 @@ for i in range(N+1):
     # plot grey line horizontal and vertical through min
     energyMinX = x[np.argmin(totalEnergy[i])]
     energyMinY = np.min(totalEnergy[i])
-    plotMinX = np.linspace(0,6,10)
-    plotMinY = energyMinY * np.ones(10)
-    ax.plot(plotMinX, plotMinY, 'k')
-    plotVertX = energyMinX * np.ones(10)
-    plotVertY = np.linspace(-2,2,10)
-    print plotVertX, plotVertY
-    ax.plot(plotVertX, plotVertY, 'k')
+    plotMinX = np.linspace(xMin, xMax, numPoints)
+    plotMinY = energyMinY * np.ones(numPoints)
+    grey=(0.5,0.5,0.5)
+    ax.plot(plotMinX, plotMinY, color=grey)
+    plotVertX = energyMinX * np.ones(numPoints)
+    plotVertY = np.linspace(yMin, yMax, numPoints)
+    ax.plot(plotVertX, plotVertY, color=grey)
     ax.legend()
-    ax.axis([0, 6, -2, 2])
+    ax.axis([xMin, xMax, yMin, yMax])
     ax.set_xlabel('Intimate Contact (arb units)')
     ax.set_ylabel('Energy (arb units)')
     fig.savefig(fileName)
