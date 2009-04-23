@@ -12,12 +12,12 @@ import numpy             as np
 import matplotlib.pyplot as plt
 
 # dimensions and spring constants of structure
-l = 200.0    # in microns
+l = 60.0    # in microns
 kt = 0.1     # in newton * meter
 ks = 1.0     # in newton / meter
 
 # create data grid to plot dn vs. ds
-maxDisplacementShear = 100.0
+maxDisplacementShear = l/2
 numPoints = 11
 displacementShear = sp.linspace(0.0,maxDisplacementShear,numPoints)
 ds = displacementShear
@@ -37,11 +37,12 @@ def normalForce(dn, ds, ks, kt, l):
 # normal displacement that results in zero normal force
 for i, point in enumerate(ds):
     dnGuess = point
-    dnGuess = 100
+    dnGuess = l/4
     dn[i] = spop.fsolve(normalForce, dnGuess, (point, ks, kt, l))
 
 figure = plt.figure()
-figure.suptitle('Adhesion vs. Compression\nTE Lumped Parameter Model\nl = 200\nkt = 0.1\nks = 1.0')
+title = 'Adhesion vs. Compression\nTE Lumped Parameter Model\nl = ' + str(l) + '\nkt = ' + str(kt) + '\nks = ' + str(ks)
+figure.suptitle(title)
 
 axes = figure.add_subplot(111)
 axes.plot(ds,dn)
