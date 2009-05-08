@@ -9,11 +9,12 @@ from scipy.integrate import trapz
 
 # define derivative function for beam profile
 def derivative(phi, s):
-    return 5 * s
-
+    return sp.sqrt(sp.sin(6*s**2))
+    #return 2
+    
 initialCondition = 0
 
-nPts = 100
+nPts = 1000
 mesh = sp.linspace(0,1,nPts)
 
 # solve ode to get slope function
@@ -21,7 +22,7 @@ answer = odeint(derivative, initialCondition, mesh)
 # deal with silly mismatch between mesh dimensions and answer dimensions
 answer = sp.transpose(answer)[0]
 
-# initialize arrays
+# initialize position arrays
 x = sp.zeros(nPts)
 y = sp.zeros(nPts)
 
