@@ -54,11 +54,11 @@ totalEnergy       = np.zeros((N+1,len(xEnergy)))
 for i in range(N+1):
     # create plot for energy balance
     surfaceEnergy[i] = -0.3 * xEnergy
-    deformationEnergy[i] = 0.5 * (N+1-i) / (N+1) * xEnergy**2
+    deformationEnergy[i] = 0.5 * (N+1-i) / (N+1.0) * xEnergy**2
     totalEnergy[i] = surfaceEnergy[i] + deformationEnergy[i]
 
-grey        = (0.5,0.5,0.5)
-topColor    = (0.5,0.5,1.0)
+grey        = (0.5, 0.5, 0.5)
+topColor    = (0.0, 1.0, 0.0)
 bottomColor = (0.5, 0.5, 0.5)
 
 # generate plots
@@ -86,7 +86,7 @@ for i in range(N+1):
             color=topColor)
     ax.plot(xEnergy, totalEnergy[i],       
             label='Total Energy',
-            color='green')
+            color='blue')
     # find min of total energy
     # plot grey line horizontal and vertical through min
     energyMinX = xEnergy[np.argmin(totalEnergy[i])]
@@ -99,7 +99,7 @@ for i in range(N+1):
     ax.plot(plotVertX, plotVertY, color=grey)
     ax.legend()
     ax.axis([xMin, xMax, yMin, yMax])
-    ax.set_xlabel('Intimate Contact (arb units)')
+    ax.set_xlabel('Intimate Contact Area (arb units)')
     ax.set_ylabel('Energy (arb units)')
     fig.savefig(fileName)
     mpl.close()
