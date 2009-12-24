@@ -1,18 +1,23 @@
 #!/usr/bin/env python
 '''
 integrate a curve of angle vs. arc length and plot
+we define the derivative of the slope curve
+and then integrate this function
+the 
 '''
 
 import scipy as sp
 from scipy.integrate import odeint
 from scipy.integrate import trapz
 
-# define derivative function for beam profile
+'''
+define function for the derivative of the 
+slope of the beam profile
+'''
 def derivative(phi, s):
     return sp.sqrt(sp.sin(6*s**2))
-    #return 2
     
-initialCondition = 0
+initialCondition = 0.0
 
 nPts = 1000
 mesh = sp.linspace(0,1,nPts)
