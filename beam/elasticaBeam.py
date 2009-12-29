@@ -40,7 +40,7 @@ from scipy           import linspace
 from scipy.optimize  import fsolve
 import matplotlib.pyplot as mpl
         
-class beam:
+class elasticaBeam:
     E = 1e6              # elastic modulus of beam (Pa)
     t = 20e-6            # dimension of beam in bending direction (m)
     w = 20e-6            # width of beam (m)
@@ -168,7 +168,7 @@ def main():
     I = t**3 * w / 12.0 # moment of inertia
     L = 52e-6           # length of beam
 
-    thisBeam = beam()
+    thisBeam = elasticaBeam()
     thisBeam.setBeamDimensions(L,t,w,E)
     load = 1e-5
     thisBeam.applyShearLoad(load)
@@ -177,7 +177,7 @@ def main():
     thisBeam.calculateSlopeFunction()
     thisBeam.calculateDisplacements()
 
-    thatBeam = beam()
+    thatBeam = elasticaBeam()
     thatBeam.setBeamDimensions(L,t,w,E)
     load = 1e-4
     thatBeam.applyShearLoad(load)
