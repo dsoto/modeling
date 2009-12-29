@@ -20,6 +20,12 @@ when i come back next time, i need to figure out the ODE solution
 December 28, 2009 4:02:49 PM -0800
 i have the end beam angle as a function of load
 now i want to integrate the solution to find the profiles
+
+December 29, 2009 11:27:22 AM -0800
+this script along with generalBeam.py are giving me a consistent
+looking solution for the beam profile.
+my plan now is to create a beam object to facilitate repeated 
+computation of profiles.
 '''
 
 import scipy as sp
@@ -33,129 +39,146 @@ from scipy           import zeros
 from scipy           import linspace
 from scipy.optimize  import fsolve
 
-E = 2e6           # modulus of pdms
-t = 19e-6           # thickness of beam
-w = 19e-6           # width of beam
-I = t**3 * w / 12.0 # moment of inertia
-L = 52e-6           # length of beam
+class beam:
+    E = 1e6              # elastic modulus of beam (Pa)
+    t = 20e-6            # dimension of beam in bending direction (m)
+    w = 20e-6            # width of beam (m)
+    I = t**3 * w / 12.0  # moment of inertia for rectangular beam
+    L = 60e-6            # length of beam (m)
+    numPoints = 100      # number of grid points for ODE
+    debug = False
+    shearLoad = 1e-6     # transverse load on beam (N)
+    psiL = 0             # angle at end of beam (radians)
 
-#debug = True 
-debug = False
-# this function returns the normalized arc length of
-# a beam using the arc length integral
-def arcLengthIntegral(psiL):
-    answer = quad(arcLengthElement,0,psiL,args=(psiL))[0]
-    if (debug): 
-        print 'normalized arc length = ',answer
-        print 'psiL =', psiL
-    return answer
-    
-# this function is used to provide the integrand
-# for the normalized arc length
-def arcLengthElement(psi,psiL):
-    
-    # how do i manage the singularity problem here during the solve routine?
-    # if psiL is greater than pi/2, this will always return imaginary
-    answer = 1/sqrt(sin(psiL)-sin(psi))
-    # here my janky solution is to only take the absolute value
-    answer = abs(answer)
-    if (debug): 
+    def __init__(self):
         pass
-        #print 'psi =',psi,'psiL =',psiL
-        #print 'arcLengthElement =', answer
-    return answer
+        
+    def setBeamDimensions(self,L,t,w,E):
+        self.L = L
+        self.t = t
+        self.w = w
+        self.E = E
+        self.I = t**3 * w / 12.0
+        
+    def setNumPoints(self, numPoints):
+        self.numPoints = numPoints
+        
+    def applyShearLoad(self, shearLoad):
+        self.shearLoad = shearLoad
+        
+    def calculateEndAngle(self):
+        angleTry = linspace(1e-9, 3.1415/2, 200)
+        #try brute force solution to avoid problem with imaginary integrand
+        for thisAngle in angleTry:
+            error = self.L - self.beamLength(thisAngle, self.shearLoad)
+            if (error < 0) :
+                self.psiL = thisAngle
+                if (self.debug): 
+                    print 'final angle =',self.psiL
+                    print '-'*50
+                    print self.shearLoad, self.psiL
+                break
 
-# takes normalized arclength and multiplies by dimensions
-# to scale to physical dimensions
-def beamLength(psiL,load):
-    #return arcLengthIntegral(psiL)
-    answer = arcLengthIntegral(psiL) * sqrt(E*I/2/load)
-    if (debug): print 'physical arc length = ',answer
-    return answer
-
-# compares computed beam length as a function of end slope
-# to the measured beam length
-def solveFunction(psiL, load):
-    return L - beamLength(psiL,load)
+    def calculateSlopeFunction(self):
+        initialCondition = 0.0
+        mesh = sp.linspace(0, self.L, self.numPoints)
+        answer = odeint(self.derivative, initialCondition, mesh)
+        # deal with silly mismatch between mesh dimensions and answer dimensions
+        self.slope = sp.transpose(answer)[0]
+        if (self.debug): print self.slope
     
-nPts = 5
-loadArray = linspace(0,10,nPts) * 1e-6     # shear load on beam
-if (debug): print loadArray
+    def calculateDisplacements(self):
+        # initialize position arrays
+        self.x = sp.zeros(self.numPoints)
+        self.y = sp.zeros(self.numPoints)
+        # take trig functions for position integrals
+        xInt = sp.cos(self.slope)
+        yInt = sp.sin(self.slope)
+        # loop through and numerically integrate discrete functions
+        mesh = sp.linspace(0, self.L, self.numPoints)
+        for i,val in enumerate(mesh):
+            self.x[i] = trapz(xInt[:i+1],mesh[:i+1])
+            self.y[i] = trapz(yInt[:i+1],mesh[:i+1])
+            
+    def plotBeam(self):
+        import matplotlib.pyplot as mpl
+        figure = mpl.figure()
+        ax = figure.add_subplot(111, aspect='equal')
+        #ax = figure.add_subplot(111)
+        ax.plot(self.x, self.y, label='profile')
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        #ax.legend()
+        mpl.show()
 
-#'''
-# loop through values
-angle = zeros(nPts)
-angleTry = linspace(1e-9, 3.1415/2, 200)
-for i, thisLoad in enumerate(loadArray):
-    #try brute force solution to avoid problem with imaginary integrand
-    for thisAngle in angleTry:
-        error = L - beamLength(thisAngle, thisLoad)
-        if (error < 0) :
-            if (debug): print 'final angle =',thisAngle
-            break
-        #angle[i] = fsolve(solveFunction, angleGuess, thisLoad)
-    #print thisLoad, angle[i]
-    print '-'*50
-    print thisLoad, thisAngle, beamLength(thisAngle, thisLoad)
-#''' 
+    def printParameters(self):
+        print '-'*50
+        print 'beam modulus      =', self.E
+        print 'beam thickness    =', self.t
+        print 'beam width        =', self.w
+        print 'moment of inertia =', self.I
+        print 'beam length       =', self.L
+        print 'grid points       =', self.numPoints
+        print '-'*50
 
-
-
-
-
-'''
-# derivative of ODE for beam shape
-def derivative(psi, s):
-    return sp.sqrt(sin(psiL)-sin(psi))
+    def arcLengthIntegral(self, psiL):
+        # this function returns the normalized arc length of
+        # a beam using the arc length integral
+        answer = quad(self.arcLengthElement,0,psiL,args=(psiL))[0]
+        if (self.debug): 
+            print 'normalized arc length = ',answer
+            print 'psiL =', psiL
+        return answer
+        
+    def arcLengthElement(self, psi, psiL):
+        # this function is used to provide the integrand
+        # for the normalized arc length        
+        # how do i manage the singularity problem here during the solve routine?
+        # if psiL is greater than pi/2, this will always return imaginary
+        answer = 1/sqrt(sin(psiL)-sin(psi))
+        # here my janky solution is to only take the absolute value
+        answer = abs(answer)
+        if (self.debug): 
+            pass
+            #print 'psi =',psi,'psiL =',psiL
+            #print 'arcLengthElement =', answer
+        return answer
     
-initialCondition = 0.0
+    def beamLength(self,psiL,load):
+        # takes normalized arclength and multiplies by dimensions
+        # to scale to physical dimensions
+        #return arcLengthIntegral(psiL)
+        answer = self.arcLengthIntegral(psiL) * sqrt(self.E*self.I/2/self.shearLoad)
+        if (self.debug): print 'physical arc length = ',answer
+        return answer
+    
+    def solveFunction(self, psiL, load):
+        # compares computed beam length as a function of end slope
+        # to the measured beam length
+        return self.L - self.beamLength(psiL,load)
 
-nPts = 1000
-mesh = sp.linspace(0,1,nPts)
+    def derivative(self,psi, s):
+        if (self.debug): print self.psiL
+        factor = sp.sqrt(2*self.shearLoad/self.E/self.I)
+        answer = sp.sqrt(sp.sin(self.psiL)-sp.sin(psi))
+        return answer * factor
 
-# solve ode to get slope function
-answer = odeint(derivative, initialCondition, mesh)
-# deal with silly mismatch between mesh dimensions and answer dimensions
-answer = sp.transpose(answer)[0]
+def main():
+    E = 2e6           # modulus of pdms
+    t = 19e-6           # thickness of beam
+    w = 19e-6           # width of beam
+    I = t**3 * w / 12.0 # moment of inertia
+    L = 52e-6           # length of beam
 
-# initialize position arrays
-x = sp.zeros(nPts)
-y = sp.zeros(nPts)
-
-# take trig functions for position integrals
-xInt = sp.cos(answer)
-yInt = sp.sin(answer)
-
-# loop through and numerically integrate discrete functions
-for i,val in enumerate(mesh):
-    x[i] = trapz(xInt[:i+1],mesh[:i+1])
-    y[i] = trapz(yInt[:i+1],mesh[:i+1])
-''' 
-
-
-'''
-
-realBeamLength = 6.8
-ans = fsolve(solveFunction, angleGuess, realBeamLength)
-print ans
-'''
- 
- 
-# here we find the load necessary for 
-#load = (normalizedArcLength / L * sqrt(E * I / 2))**2 * 1e6
-#load = normalizedArcLength
-# get your plot on
-'''
-import matplotlib.pyplot as mpl
-figure = mpl.figure()
-ax = figure.add_subplot(111)
-ax.plot(angleRange, load)
-#ax.set_title('Load Required for End Slope $\psi_L$')
-ax.set_title('Normalized Beam Length')
-ax.set_xlabel('final slope ($\psi_L$)')
-#ax.set_ylabel(r'shear load ($\mu$N)')
-ax.set_ylabel(r'Normalized Beam Length ($L/L_0$)')
-#ax.text(1,1,r'modulus\\thickness\\width\\length')
-#ax.legend()
-mpl.show()
-'''
+    thisBeam = beam()
+    thisBeam.setBeamDimensions(L,t,w,E)
+    load = 1e-5
+    thisBeam.applyShearLoad(load)
+    thisBeam.printParameters()
+    thisBeam.calculateEndAngle()
+    thisBeam.calculateSlopeFunction()
+    thisBeam.calculateDisplacements()
+    thisBeam.plotBeam()
+    
+if __name__ == '__main__':
+    main()
