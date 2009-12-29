@@ -13,6 +13,13 @@ necessary to get a _given_ deflection.  i want to go the
 other way which will involve numerically solving for the 
 end slope for a _given_ load.  i need to make a function
 that returns the length integral and use it to find a root.
+
+December 23, 2009 7:02:25 PM -0800
+when i come back next time, i need to figure out the ODE solution
+
+December 28, 2009 4:02:49 PM -0800
+i have the end beam angle as a function of load
+now i want to integrate the solution to find the profiles
 '''
 
 import scipy as sp
@@ -72,16 +79,11 @@ def solveFunction(psiL, load):
     return L - beamLength(psiL,load)
     
 nPts = 5
-loadArray = linspace(.1,20,nPts) * 1e-6     # shear load on beam
-loadArray = linspace(0,1,nPts) * 1e-6     # shear load on beam
-#loadArray = [5000*1e-12]
-#loadArray = [0.1e-6]
+loadArray = linspace(0,10,nPts) * 1e-6     # shear load on beam
 if (debug): print loadArray
-#length = linspace(1,6,nPts)
 
 #'''
 # loop through values
-angleGuess = .2
 angle = zeros(nPts)
 angleTry = linspace(1e-9, 3.1415/2, 200)
 for i, thisLoad in enumerate(loadArray):
@@ -94,19 +96,13 @@ for i, thisLoad in enumerate(loadArray):
         #angle[i] = fsolve(solveFunction, angleGuess, thisLoad)
     #print thisLoad, angle[i]
     print '-'*50
-    print thisLoad, thisAngle
+    print thisLoad, thisAngle, beamLength(thisAngle, thisLoad)
 #''' 
 
-'''
-at this point i have the final angle solved
-now i can integrate the differential equation to get the 
-form of the beam
-'''
 
 
 
-# December 23, 2009 7:02:25 PM -0800
-# when i come back next time, i need to figure out the ODE solution
+
 '''
 # derivative of ODE for beam shape
 def derivative(psi, s):
