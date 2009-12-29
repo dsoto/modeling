@@ -38,7 +38,8 @@ from scipy           import sqrt
 from scipy           import zeros
 from scipy           import linspace
 from scipy.optimize  import fsolve
-
+import matplotlib.pyplot as mpl
+        
 class beam:
     E = 1e6              # elastic modulus of beam (Pa)
     t = 20e-6            # dimension of beam in bending direction (m)
@@ -53,7 +54,7 @@ class beam:
     def __init__(self):
         pass
         
-    def setBeamDimensions(self,L,t,w,E):
+    def setBeamDimensions(self, L, t, w, E):
         self.L = L
         self.t = t
         self.w = w
@@ -100,17 +101,14 @@ class beam:
             self.x[i] = trapz(xInt[:i+1],mesh[:i+1])
             self.y[i] = trapz(yInt[:i+1],mesh[:i+1])
             
-    def plotBeam(self):
-        import matplotlib.pyplot as mpl
-        figure = mpl.figure()
-        ax = figure.add_subplot(111, aspect='equal')
-        #ax = figure.add_subplot(111)
-        ax.plot(self.x, self.y, label='profile')
+    def plotBeam(self,ax,legendLabel):
+        ax.plot(self.x, self.y, label=legendLabel)
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
-        #ax.legend()
-        mpl.show()
 
+    def showPlot(self):
+        mpl.show()
+        
     def printParameters(self):
         print '-'*50
         print 'beam modulus      =', self.E
@@ -178,7 +176,25 @@ def main():
     thisBeam.calculateEndAngle()
     thisBeam.calculateSlopeFunction()
     thisBeam.calculateDisplacements()
-    thisBeam.plotBeam()
+
+    thatBeam = beam()
+    thatBeam.setBeamDimensions(L,t,w,E)
+    load = 1e-4
+    thatBeam.applyShearLoad(load)
+    thatBeam.printParameters()
+    thatBeam.calculateEndAngle()
+    thatBeam.calculateSlopeFunction()
+    thatBeam.calculateDisplacements()
+
+    
+    figure = mpl.figure()
+    ax = figure.add_subplot(111, aspect='equal')
+    thisBeam.plotBeam(ax,'beam1')
+    thatBeam.plotBeam(ax,'beam2')
+    ax.legend()
+    mpl.show()
+
+
     
 if __name__ == '__main__':
     main()
