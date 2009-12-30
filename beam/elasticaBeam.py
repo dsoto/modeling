@@ -27,7 +27,6 @@ looking solution for the beam profile.
 my plan now is to create a beam object to facilitate repeated 
 computation of profiles.
 '''
-
 import scipy as sp
 from scipy.integrate import odeint
 from scipy.integrate import quad
@@ -39,6 +38,7 @@ from scipy           import zeros
 from scipy           import linspace
 from scipy.optimize  import fsolve
 import matplotlib.pyplot as mpl
+
         
 class elasticaBeam:
     E = 1e6              # elastic modulus of beam (Pa)
@@ -50,6 +50,8 @@ class elasticaBeam:
     debug = False
     shearLoad = 1e-6     # transverse load on beam (N)
     psiL = 0             # angle at end of beam (radians)
+    xL = 0
+    yL = 0
 
     def __init__(self):
         pass
@@ -100,6 +102,8 @@ class elasticaBeam:
         for i,val in enumerate(mesh):
             self.x[i] = trapz(xInt[:i+1],mesh[:i+1])
             self.y[i] = trapz(yInt[:i+1],mesh[:i+1])
+        self.xL = self.x[self.numPoints-1]
+        self.yL = self.y[self.numPoints-1]
             
     def plotBeam(self,ax,legendLabel):
         ax.plot(self.x, self.y, label=legendLabel)
@@ -108,17 +112,36 @@ class elasticaBeam:
 
     def showPlot(self):
         mpl.show()
+    
+    def xDisplacement(self):
+        return self.xL
         
+    def yDisplacement(self):
+        return self.yL
+    
+    def stringParameters(self):
+        returnString = r'beam modulus      = ' + str(self.E) + '\n'
+        returnString +=  'beam thickness    ='+ str(self.t) + '\n'
+        returnString +=  'beam width        ='+ str(self.w) + '\n'
+        returnString +=  'beam length       ='+ str(self.L) + '\n'
+        return returnString
+
     def printParameters(self):
-        print '-'*50
+        print '-' * 50
         print 'beam modulus      =', self.E
         print 'beam thickness    =', self.t
         print 'beam width        =', self.w
         print 'moment of inertia =', self.I
         print 'beam length       =', self.L
         print 'grid points       =', self.numPoints
-        print '-'*50
+        print '-' * 50
 
+    def printResults(self):
+        print '-' * 50
+        print 'x displacement    =', self.xL
+        print 'y displacement    =', self.yL
+        print 'final angle       =', self.psiL
+        
     def arcLengthIntegral(self, psiL):
         # this function returns the normalized arc length of
         # a beam using the arc length integral
