@@ -106,7 +106,8 @@ class elasticaBeam:
         self.yL = self.y[self.numPoints-1]
             
     def plotBeam(self,ax,legendLabel):
-        ax.plot(self.x, self.y, label=legendLabel)
+        scale = 1e6
+        ax.plot(scale*self.x, scale*self.y, label=legendLabel)
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
 
