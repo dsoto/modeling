@@ -66,30 +66,12 @@ class elasticaBeam:
     def setNumPoints(self, numPoints):
         self.numPoints = numPoints
         
+    def setDebug(self, debug):
+        self.debug = debug
+        
     def applyShearLoad(self, shearLoad):
         self.shearLoad = shearLoad
-        
-    def calculateEndAngle(self):
-        angleTry = linspace(1e-9, 3.1415/2, 200)
-        #try brute force solution to avoid problem with imaginary integrand
-        for thisAngle in angleTry:
-            error = self.L - self.beamLength(thisAngle, self.shearLoad)
-            if (error < 0) :
-                self.psiL = thisAngle
-                if (self.debug): 
-                    print 'final angle =',self.psiL
-                    print '-'*50
-                    print self.shearLoad, self.psiL
-                break
-
-    def calculateSlopeFunction(self):
-        initialCondition = 0.0
-        mesh = sp.linspace(0, self.L, self.numPoints)
-        answer = odeint(self.derivative, initialCondition, mesh)
-        # deal with silly mismatch between mesh dimensions and answer dimensions
-        self.slope = sp.transpose(answer)[0]
-        if (self.debug): print self.slope
-    
+     
     def calculateDisplacements(self):
         # initialize position arrays
         self.x = sp.zeros(self.numPoints)
@@ -142,48 +124,53 @@ class elasticaBeam:
         print 'x displacement    =', self.xL
         print 'y displacement    =', self.yL
         print 'final angle       =', self.psiL
-        
-    def arcLengthIntegral(self, psiL):
-        # this function returns the normalized arc length of
-        # a beam using the arc length integral
-        answer = quad(self.arcLengthElement,0,psiL,args=(psiL))[0]
-        if (self.debug): 
-            print 'normalized arc length = ',answer
-            print 'psiL =', psiL
-        return answer
-        
-    def arcLengthElement(self, psi, psiL):
-        # this function is used to provide the integrand
-        # for the normalized arc length        
-        # how do i manage the singularity problem here during the solve routine?
-        # if psiL is greater than pi/2, this will always return imaginary
-        answer = 1/sqrt(sin(psiL)-sin(psi))
-        # here my janky solution is to only take the absolute value
-        answer = abs(answer)
-        if (self.debug): 
-            pass
-            #print 'psi =',psi,'psiL =',psiL
-            #print 'arcLengthElement =', answer
-        return answer
-    
-    def beamLength(self,psiL,load):
-        # takes normalized arclength and multiplies by dimensions
-        # to scale to physical dimensions
-        #return arcLengthIntegral(psiL)
-        answer = self.arcLengthIntegral(psiL) * sqrt(self.E*self.I/2/self.shearLoad)
-        if (self.debug): print 'physical arc length = ',answer
-        return answer
-    
-    def solveFunction(self, psiL, load):
-        # compares computed beam length as a function of end slope
-        # to the measured beam length
-        return self.L - self.beamLength(psiL,load)
+                
+    def calculateSlopeFunction(self):
+        if (self.debug):
+            print 'entered calculateSlopeFunction'
+        # here we call the solve function
+        # initial condition = bending moment / modulus / moment of inertia
+        guess = self.shearLoad * self.L / self.E / self.I
+        guess = 30000
+        if (self.debug):
+            print 'initial derivative guess =', guess
+        initialDerivative = fsolve(self.solveFunction, guess)
+        print 'initialDerivative =', initialDerivative
 
-    def derivative(self,psi, s):
-        if (self.debug): print self.psiL
-        factor = sp.sqrt(2*self.shearLoad/self.E/self.I)
-        answer = sp.sqrt(sp.sin(self.psiL)-sp.sin(psi))
-        return answer * factor
+    def solveFunction(self, initialDerivative):
+        if (self.debug):
+            print 'entering solveFunction'
+        mesh = sp.linspace(0, self.L, self.numPoints)
+        initialCondition = zeros(2)
+        initialCondition[0] = 0
+        initialCondition[1] = initialDerivative
+        # this answer will be the slope function and its first derivative
+        answer = odeint(self.derivative, initialCondition, mesh)
+        # we store the slope function (the first column) as a member variable
+        self.slope = answer[:,0]
+        # we take the last element of the second column
+        # this is the change in slope at the end of the beam
+        # which should be zero
+        self.slopeDerivative = answer[:,1]
+        if (self.debug): 
+            #print self.slope
+            print 'starting slope derivative =', self.slopeDerivative[0]
+            print 'ending slope derivative =', self.slopeDerivative[self.numPoints-1]
+        return self.slopeDerivative[self.numPoints-1]
+
+    def derivative(self, Psi, s):
+        if (self.debug):
+            pass
+            #print 'entering derivative'
+        d = zeros(2)
+        d[0] = Psi[1]
+        # derivative function for normal beam
+        d[1] = -self.shearLoad / self.E / self.I * cos(Psi[0])
+        if (self.debug):
+            pass
+            #print 'first derivative  =', d[0]
+            #print 'second derivative =', d[1]
+        return d
 
 def main():
     E = 2e6           # modulus of pdms
@@ -197,16 +184,15 @@ def main():
     load = 1e-5
     thisBeam.applyShearLoad(load)
     thisBeam.printParameters()
-    thisBeam.calculateEndAngle()
     thisBeam.calculateSlopeFunction()
     thisBeam.calculateDisplacements()
 
     thatBeam = elasticaBeam()
     thatBeam.setBeamDimensions(L,t,w,E)
-    load = 1e-4
+    load = 5e-5
+    thatBeam.setDebug(True)
     thatBeam.applyShearLoad(load)
     thatBeam.printParameters()
-    thatBeam.calculateEndAngle()
     thatBeam.calculateSlopeFunction()
     thatBeam.calculateDisplacements()
 
