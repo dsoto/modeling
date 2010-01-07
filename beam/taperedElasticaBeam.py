@@ -77,7 +77,7 @@ class taperedElasticaBeam:
     w = 20e-6            # width of beam (m)
     I = t**3 * w / 12.0  # moment of inertia for rectangular beam
     L = 60e-6            # length of beam (m)
-    Lt = 120e-6          # length of taper (m) at Lt beam has zero thickness
+    Lt = 120e-1          # length of taper (m) at Lt beam has zero thickness
     numPoints = 100      # number of grid points for ODE
     debug = False
     shearLoad = 1e-6     # transverse load on beam (N)
@@ -110,6 +110,7 @@ class taperedElasticaBeam:
         # here we call the solve function
         # initial condition = bending moment / modulus / moment of inertia
         guess = self.shearLoad * self.L / self.E / self.I
+        guess = 90000
         initialDerivative = fsolve(self.solveFunction, guess)
         print 'initialDerivative =', initialDerivative
 
@@ -138,20 +139,48 @@ class taperedElasticaBeam:
         if (self.debug):
             print 'entering derivative'
         d = zeros(2)
-        d[0]=Psi[1]
-        d[1]=-self.shearLoad/self.E/self.I*cos(Psi[0])
+        d[0] = Psi[1]
+        # derivative function for normal beam
+        #d[1] = -self.shearLoad / self.E / self.I * cos(Psi[0])
+        # derivative function for tapered beam
+        d[1] = ( -self.shearLoad / self.E * cos(Psi[0])
+                 -self.momentDerivative(s) * Psi[1]) / self.moment(s)
         if (self.debug):
-            print d
+            print 'first derivative  =', d[0]
+            print 'second derivative =', d[1]
         return d
 
+    def moment(self, s):
+        thisMoment = 1.0 / 12.0 * self.w * self.thickness(s)**3
+        if (self.debug):
+            print 'width =', self.w * 1e6
+            print 'thickness =', self.thickness(s) * 1e6
+            print 'arc length =', s * 1e6
+        if (self.debug):
+            print 'moment =', thisMoment
+        #return self.t**3 * self.w / 12.0
+        return thisMoment
+    
+    def momentDerivative(self, s):
+        thisMD = 1.0 / 4.0 * self.w * self.thickness(s)**2 * (-self.t) / self.Lt
+        if (self.debug):
+            print 'arclength =', s
+            print 'moment derivative =', thisMD
+        #return 0
+        return thisMD
+        
+    def thickness(self, s):
+        thisThickness = self.t * (1 - s / self.Lt)
+        return thisThickness
+        
     def printParameters(self):
         print '-' * 50
         print 'beam modulus      =', self.E
-        print 'beam thickness    =', self.t
-        print 'beam width        =', self.w
+        print 'beam thickness    =', self.t * 1e6
+        print 'beam width        =', self.w * 1e6
         print 'moment of inertia =', self.I
-        print 'beam length       =', self.L
-        print 'taper length      =', self.Lt
+        print 'beam length       =', self.L * 1e6
+        print 'taper length      =', self.Lt * 1e6
         print 'grid points       =', self.numPoints
         print '-' * 50
 
@@ -172,7 +201,7 @@ class taperedElasticaBeam:
             
     def plotBeam(self, ax, legendLabel):
         scale = 1e6
-        ax.plot(scale*self.x, scale*self.y, 'o', label=legendLabel)
+        ax.plot(scale*self.x, scale*self.y, label=legendLabel)
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
 
@@ -192,7 +221,9 @@ class taperedElasticaBeam:
         returnString +=  'beam length       ='+ str(self.L) + '\n'
         return returnString
 
-
+    def setDebug(self, debug):
+        self.debug = debug
+        
     def printResults(self):
         print '-' * 50
         print 'x displacement    =', self.xL
@@ -220,7 +251,7 @@ def main():
     w = 19e-6           # width of beam
     I = t**3 * w / 12.0 # moment of inertia
     L = 52e-6           # length of beam
-    Lt = 100e-6         # length of taper
+    Lt = 100e1         # length of taper
 
     thisBeam = taperedElasticaBeam()
     thisBeam.setBeamDimensions(L,Lt,t,w,E)
