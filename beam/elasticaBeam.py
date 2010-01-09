@@ -130,8 +130,8 @@ class elasticaBeam:
             print 'entered calculateSlopeFunction'
         # here we call the solve function
         # initial condition = bending moment / modulus / moment of inertia
-        guess = self.shearLoad * self.L / self.E / self.I
-        guess = 30000
+        guess = self.shearLoad * self.L / self.E / self.I / 3
+        #guess = 30000
         if (self.debug):
             print 'initial derivative guess =', guess
         initialDerivative = fsolve(self.solveFunction, guess)
