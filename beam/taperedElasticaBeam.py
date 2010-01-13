@@ -103,8 +103,7 @@ class taperedElasticaBeam:
         
     def applyShearLoad(self, shearLoad):
         self.shearLoad = shearLoad
-        
-        
+                
     def calculateSlopeFunction(self):
         pass
         # here we call the solve function
@@ -117,12 +116,12 @@ class taperedElasticaBeam:
     def solveFunction(self, initialDerivative):
         if (self.debug):
             print 'entering solveFunction'
-        mesh = sp.linspace(0, self.L, self.numPoints)
+        self.mesh = sp.linspace(0, self.L, self.numPoints)
         initialCondition = zeros(2)
         initialCondition[0] = 0
         initialCondition[1] = initialDerivative
         # this answer will be the slope function and its first derivative
-        answer = odeint(self.derivative, initialCondition, mesh)
+        answer = odeint(self.derivative, initialCondition, self.mesh)
         # we store the slope function (the first column) as a member variable
         self.slope = answer[:,0]
         # we take the last element of the second column
@@ -204,6 +203,26 @@ class taperedElasticaBeam:
         ax.plot(scale*self.x, scale*self.y, label=legendLabel)
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
+
+    def plotSlope(self, ax, legendLabel):
+        scale = 1e6
+        ax.plot(scale*self.mesh, self.slope, label=legendLabel)
+        ax.set_xlabel('Arc Length ($\mu$m)')
+        ax.set_ylabel('Beam Slope (rad)')
+        
+    def plotCurvature(self, ax, legendLabel):
+        scale = 1e6
+        ax.plot(scale*self.mesh, self.slopeDerivative, label=legendLabel)
+        ax.set_xlabel('Arc Length ($\mu$m)')
+        ax.set_ylabel('Beam Curvature (m$^{-1}$)')
+
+    def plotRadiusOfCurvature(self, ax, legendLabel):
+        scale = 1e6
+        ax.plot(scale*self.mesh, 
+                1/abs(self.slopeDerivative)*scale, label=legendLabel)
+        ax.set_ylim((0,100))
+        ax.set_xlabel('Arc Length ($\mu$m)')
+        ax.set_ylabel('Radius of Curvature ($\mu$m)')
 
     def showPlot(self):
         mpl.show()
