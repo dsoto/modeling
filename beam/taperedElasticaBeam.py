@@ -248,8 +248,7 @@ class taperedElasticaBeam:
         print 'x displacement    =', self.xL
         print 'y displacement    =', self.yL
         print 'final angle       =', self.psiL
-        
-        
+                
 '''
 algorithm for finding beam profile
 
@@ -285,8 +284,6 @@ def main():
     thisBeam.plotBeam(ax,'thisBeam')
     ax.legend()
     mpl.show()
-
-
 
 if __name__ == '__main__':
     main()
