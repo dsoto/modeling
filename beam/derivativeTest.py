@@ -6,29 +6,32 @@ import scipy as sp
 import matplotlib.pyplot as mpl
 
 
-E = 2e6           # modulus of pdms
-t = 19e-6           # thickness of beam
-w = 19e-6           # width of beam
+E = 2e6             # modulus of pdms
+t = 20e-6           # thickness of beam
+w = 20e-6           # width of beam
 I = t**3 * w / 12.0 # moment of inertia
-L = 52e-6           # length of beam
-Lt = 100e-6         # length of taper
+L = 50e-6           # length of beam
+Lt = 1000000e-6         # length of taper
+numPoints = 100
+
 
 taperedBeam = teb.taperedElasticaBeam()
+taperedBeam.setDebug(False)
 taperedBeam.setBeamDimensions(L,Lt,t,w,E)
 load = 1e-5
 taperedBeam.applyShearLoad(load)
-taperedBeam.setNumPoints(20)
+taperedBeam.setNumPoints(numPoints)
 taperedBeam.printParameters()
 taperedBeam.calculateSlopeFunction()
 taperedBeam.calculateDisplacements()
 
 beam = eb.elasticaBeam()
+taperedBeam.setDebug(False)
 beam.setBeamDimensions(L,t,w,E)
 load = 1e-5
 beam.applyShearLoad(load)
-beam.setNumPoints(20)
+beam.setNumPoints(numPoints)
 beam.printParameters()
-beam.calculateEndAngle()
 beam.calculateSlopeFunction()
 beam.calculateDisplacements()
 
@@ -36,6 +39,6 @@ figure = mpl.figure()
 ax = figure.add_subplot(111, aspect='equal')
 taperedBeam.plotBeam(ax,'taperedBeam')
 beam.plotBeam(ax,'untapered')
-ax.legend()
+ax.legend(loc='best')
 mpl.show()
 

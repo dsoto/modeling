@@ -49,6 +49,7 @@ ax.legend(loc='best')
 ax.set_xlabel('X (microns)')
 ax.set_ylabel('Y (microns)')
 figure.suptitle('Beam Deflection Using Elastica Model')
+
 yPos = -8
 strings = [os.path.abspath(__file__), 
            datetime.now(),
