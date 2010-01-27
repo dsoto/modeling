@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import taperedElasticaBeam as teb
+import matplotlib          as mpl
 import matplotlib.pyplot   as plt
 
 E = 2e6           # modulus of pdms
@@ -63,7 +64,8 @@ string  = ('load = '+str(load*1e6)+' microns'+'\n'+
 
 xPos = 0.5
 yPos = 0.05
-plt.figtext(xPos, yPos, string, fontsize = 10,ha='center')
+plt.figtext(xPos, yPos, string,
+            ha='center')
 
 
 figure.savefig('scratch.pdf',transparent=True)
