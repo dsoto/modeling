@@ -67,6 +67,12 @@ class taperedElasticaBeam:
         # return last element of slope function
         return angle - self.slope[-1]
         
+    def addSlopeWithLength(self, slope, length):
+        # add a length of slopes to simulate the beam in side contact
+        self.lengthInContact = length
+        slopeArray = slope * sp.ones(int(self.numPoints/self.L*length))
+        self.slope = sp.hstack([self.slope, slopeArray])
+        
     def derivativeForEndAngle(self, psi, s, bendingMoment):
         # this needs to be able to use different values for
         # the bending moment applied
@@ -167,11 +173,15 @@ class taperedElasticaBeam:
         # initialize position arrays
         self.x = sp.zeros(self.numPoints)
         self.y = sp.zeros(self.numPoints)
+        # use length of slope array
+        self.x = sp.zeros(len(self.slope))
+        self.y = sp.zeros(len(self.slope))
+        
         # take trig functions for position integrals
         xInt = sp.cos(self.slope)
         yInt = sp.sin(self.slope)
         # loop through and numerically integrate discrete functions
-        mesh = sp.linspace(0, self.L, self.numPoints)
+        mesh = sp.linspace(0, self.L+self.lengthInContact, len(self.slope))
         for i,val in enumerate(mesh):
             self.x[i] = trapz(xInt[:i+1],mesh[:i+1])
             self.y[i] = trapz(yInt[:i+1],mesh[:i+1])
