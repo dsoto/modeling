@@ -27,11 +27,11 @@ class taperedElasticaBeam:
     xL = 0
     yL = 0
     slopeCalculated = False
-    
+
 
     def __init__(self):
         pass
-        
+
     def setBeamDimensions(self, L, Lt, t, w, E):
         self.L  = L
         self.Lt = Lt
@@ -39,40 +39,40 @@ class taperedElasticaBeam:
         self.w  = w
         self.E  = E
         self.I  = t**3 * w / 12.0
-        
+
     def setNumPoints(self, numPoints):
         self.numPoints = numPoints
-        
+
     def applyShearLoad(self, shearLoad):
         self.shearLoad = shearLoad
-        
+
     def calculateSlopeFunctionForEndAngle(self, angle):
-        # this function applies a moment at the end of the 
+        # this function applies a moment at the end of the
         # beam to get the end angle to be the specified angle
         bendingMoment = 0
-        solution = fsolve(self.solveFunctionForEndAngle, 
-                          bendingMoment, 
+        solution = fsolve(self.solveFunctionForEndAngle,
+                          bendingMoment,
                           args = (angle,))
         return solution
-        
+
     def solveFunctionForEndAngle(self, bendingMoment, angle):
         self.mesh = sp.linspace(0, self.L, self.numPoints)
         initialCondition = 0
-        answer = odeint(self.derivativeForEndAngle, 
-                        initialCondition, 
+        answer = odeint(self.derivativeForEndAngle,
+                        initialCondition,
                         self.mesh,
                         args = (bendingMoment,))
-        
+
         self.slope = answer[:,0]
         # return last element of slope function
         return angle - self.slope[-1]
-        
+
     def addSlopeWithLength(self, slope, length):
         # add a length of slopes to simulate the beam in side contact
         self.lengthInContact = length
         slopeArray = slope * sp.ones(int(self.numPoints/self.L*length))
         self.slope = sp.hstack([self.slope, slopeArray])
-        
+
     def derivativeForEndAngle(self, psi, s, bendingMoment):
         # this needs to be able to use different values for
         # the bending moment applied
@@ -80,17 +80,17 @@ class taperedElasticaBeam:
 
     def calculateSlopeFunctionForPointLoad(self):
         self.calculateSlopeFunction()
-        
+
     def calculateSlopeFunction(self):
         # this function uses fsolve to find the initial derivative
-        # of the slope function that will make the derivative at 
+        # of the slope function that will make the derivative at
         # the end of the beam zero
         #
         # initial condition = bending moment / modulus / moment of inertia
         guess = self.shearLoad * self.L / self.E / self.I
-        guess = 90000
+        #guess = 90000
         initialDerivative = fsolve(self.solveFunction, guess)
-        if (self.debug): 
+        if (self.debug):
             print 'initialDerivative =', initialDerivative
 
     def solveFunction(self, initialDerivative):
@@ -113,12 +113,12 @@ class taperedElasticaBeam:
         # this is the change in slope at the end of the beam
         # which should be zero
         self.slopeDerivative = answer[:,1]
-        if (self.debug): 
+        if (self.debug):
             #print self.slope
             print 'starting slope derivative =', self.slopeDerivative[0]
             print 'ending slope derivative =', self.slopeDerivative[self.numPoints-1]
         return self.slopeDerivative[self.numPoints-1]
- 
+
     def derivative(self, Psi, s):
         # returns the derivatives for the beam function
         if (self.debug):
@@ -145,7 +145,7 @@ class taperedElasticaBeam:
             print 'moment =', thisMoment
         #return self.t**3 * self.w / 12.0
         return thisMoment
-    
+
     def momentDerivative(self, s):
         thisMD = 1.0 / 4.0 * self.w * self.thickness(s)**2 * (-self.t) / self.Lt
         if (self.debug):
@@ -153,11 +153,11 @@ class taperedElasticaBeam:
             print 'moment derivative =', thisMD
         #return 0
         return thisMD
-        
+
     def thickness(self, s):
         thisThickness = self.t * (1 - s / self.Lt)
         return thisThickness
-        
+
     def printParameters(self):
         print '-' * 50
         print 'beam modulus      =', self.E
@@ -176,7 +176,7 @@ class taperedElasticaBeam:
         # use length of slope array
         self.x = sp.zeros(len(self.slope))
         self.y = sp.zeros(len(self.slope))
-        
+
         # take trig functions for position integrals
         xInt = sp.cos(self.slope)
         yInt = sp.sin(self.slope)
@@ -187,7 +187,7 @@ class taperedElasticaBeam:
             self.y[i] = trapz(yInt[:i+1],mesh[:i+1])
         self.xL = self.x[self.numPoints-1]
         self.yL = self.y[self.numPoints-1]
-            
+
     def plotBeam(self, ax, legendLabel):
         scale = 1e6
         ax.plot(scale*self.x, scale*self.y, label=legendLabel)
@@ -199,7 +199,7 @@ class taperedElasticaBeam:
         ax.plot(scale*self.mesh, self.slope, label=legendLabel)
         ax.set_xlabel('Arc Length ($\mu$m)')
         ax.set_ylabel('Beam Slope (rad)')
-        
+
     def plotCurvature(self, ax, legendLabel):
         scale = 1e6
         ax.plot(scale*self.mesh, self.slopeDerivative, label=legendLabel)
@@ -208,7 +208,7 @@ class taperedElasticaBeam:
 
     def plotRadiusOfCurvature(self, ax, legendLabel):
         scale = 1e6
-        ax.plot(scale*self.mesh, 
+        ax.plot(scale*self.mesh,
                 1/abs(self.slopeDerivative)*scale, label=legendLabel)
         ax.set_ylim((0,100))
         ax.set_xlabel('Arc Length ($\mu$m)')
@@ -216,13 +216,13 @@ class taperedElasticaBeam:
 
     def showPlot(self):
         mpl.show()
-    
-    def xDisplacement(self):
+
+    def xTipDisplacement(self):
         return self.xL
-        
-    def yDisplacement(self):
+
+    def yTipDisplacement(self):
         return self.yL
-    
+
     def stringParameters(self):
         returnString = r'beam modulus      = ' + str(self.E) + '\n'
         returnString +=  'beam thickness    ='+ str(self.t) + '\n'
@@ -232,13 +232,13 @@ class taperedElasticaBeam:
 
     def setDebug(self, debug):
         self.debug = debug
-        
+
     def printResults(self):
         print '-' * 50
         print 'x displacement    =', self.xL
         print 'y displacement    =', self.yL
         print 'final angle       =', self.psiL
-                
+
 '''
 algorithm for finding beam profile
 
@@ -247,7 +247,7 @@ algorithm for finding beam profile
 - check if beam has dpsi/ds = 0 at end of beam
 - if dpsi/ds != 0, vary starting guess
     - can i use fsolve here by passing back the end slope?
-    
+
 we can check the validity of these results by using a very shallow
 taper and comparing to the untapered elastica beam
 
