@@ -10,7 +10,7 @@ as part of the output of this script
 December 22, 2009 12:51:46 PM -0800
 today i realized that this script currently finds the load
 necessary to get a _given_ deflection.  i want to go the
-other way which will involve numerically solving for the 
+other way which will involve numerically solving for the
 end slope for a _given_ load.  i need to make a function
 that returns the length integral and use it to find a root.
 
@@ -24,7 +24,7 @@ now i want to integrate the solution to find the profiles
 December 29, 2009 11:27:22 AM -0800
 this script along with generalBeam.py are giving me a consistent
 looking solution for the beam profile.
-my plan now is to create a beam object to facilitate repeated 
+my plan now is to create a beam object to facilitate repeated
 computation of profiles.
 '''
 import scipy as sp
@@ -39,7 +39,7 @@ from scipy           import linspace
 from scipy.optimize  import fsolve
 import matplotlib.pyplot as mpl
 
-        
+
 class elasticaBeam:
     E = 1e6              # elastic modulus of beam (Pa)
     t = 20e-6            # dimension of beam in bending direction (m)
@@ -55,23 +55,23 @@ class elasticaBeam:
 
     def __init__(self):
         pass
-        
+
     def setBeamDimensions(self, L, t, w, E):
         self.L = L
         self.t = t
         self.w = w
         self.E = E
         self.I = t**3 * w / 12.0
-        
+
     def setNumPoints(self, numPoints):
         self.numPoints = numPoints
-        
+
     def setDebug(self, debug):
         self.debug = debug
-        
+
     def applyShearLoad(self, shearLoad):
         self.shearLoad = shearLoad
-     
+
     def calculateDisplacements(self):
         # initialize position arrays
         self.x = sp.zeros(self.numPoints)
@@ -86,7 +86,7 @@ class elasticaBeam:
             self.y[i] = trapz(yInt[:i+1],mesh[:i+1])
         self.xL = self.x[self.numPoints-1]
         self.yL = self.y[self.numPoints-1]
-            
+
     def plotBeam(self,ax,legendLabel):
         scale = 1e6
         ax.plot(scale*self.x, scale*self.y, label=legendLabel)
@@ -95,13 +95,13 @@ class elasticaBeam:
 
     def showPlot(self):
         mpl.show()
-    
+
     def xDisplacement(self):
         return self.xL
-        
+
     def yDisplacement(self):
         return self.yL
-    
+
     def stringParameters(self):
         returnString = r'beam modulus      = ' + str(self.E) + '\n'
         returnString +=  'beam thickness    ='+ str(self.t) + '\n'
@@ -124,7 +124,7 @@ class elasticaBeam:
         print 'x displacement    =', self.xL
         print 'y displacement    =', self.yL
         print 'final angle       =', self.psiL
-                
+
     def calculateSlopeFunction(self):
         if (self.debug):
             print 'entered calculateSlopeFunction'
@@ -135,7 +135,8 @@ class elasticaBeam:
         if (self.debug):
             print 'initial derivative guess =', guess
         initialDerivative = fsolve(self.solveFunction, guess)
-        print 'initialDerivative =', initialDerivative
+        if (self.debug):
+            print 'initialDerivative =', initialDerivative
 
     def solveFunction(self, initialDerivative):
         if (self.debug):
@@ -152,7 +153,7 @@ class elasticaBeam:
         # this is the change in slope at the end of the beam
         # which should be zero
         self.slopeDerivative = answer[:,1]
-        if (self.debug): 
+        if (self.debug):
             #print self.slope
             print 'starting slope derivative =', self.slopeDerivative[0]
             print 'ending slope derivative =', self.slopeDerivative[self.numPoints-1]
@@ -196,7 +197,7 @@ def main():
     thatBeam.calculateSlopeFunction()
     thatBeam.calculateDisplacements()
 
-    
+
     figure = mpl.figure()
     ax = figure.add_subplot(111, aspect='equal')
     thisBeam.plotBeam(ax,'beam1')
@@ -205,6 +206,6 @@ def main():
     mpl.show()
 
 
-    
+
 if __name__ == '__main__':
     main()
