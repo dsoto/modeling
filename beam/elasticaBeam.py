@@ -44,7 +44,7 @@ class elasticaBeam:
     E = 1e6              # elastic modulus of beam (Pa)
     t = 20e-6            # dimension of beam in bending direction (m)
     w = 20e-6            # width of beam (m)
-    I = t**3 * w / 12.0  # moment of inertia for rectangular beam
+    #I = t**3 * w / 12.0  # moment of inertia for rectangular beam
     L = 60e-6            # length of beam (m)
     numPoints = 100      # number of grid points for ODE
     debug = False
@@ -111,12 +111,16 @@ class elasticaBeam:
 
     def printParameters(self):
         print '-' * 50
-        print 'beam modulus      =', self.E
-        print 'beam thickness    =', self.t
-        print 'beam width        =', self.w
-        print 'moment of inertia =', self.I
-        print 'beam length       =', self.L
-        print 'grid points       =', self.numPoints
+        print 'beam modulus                =', self.E
+        print 'beam thickness              =', self.t
+        print 'beam width                  =', self.w
+        print 'moment of inertia           =', self.I
+        print 'beam length                 =', self.L
+        print 'grid points                 =', self.numPoints
+        print 'applied shear load          =', self.shearLoad
+        print 'y (shear) tip displacement  =', self.yL
+        print 'x tip displacement          =', self.xL
+        print 'lateral spring constant     =', self.springConstant
         print '-' * 50
 
     def printResults(self):
@@ -160,18 +164,18 @@ class elasticaBeam:
         return self.slopeDerivative[self.numPoints-1]
 
     def derivative(self, Psi, s):
-        if (self.debug):
-            pass
-            #print 'entering derivative'
         d = zeros(2)
         d[0] = Psi[1]
         # derivative function for normal beam
         d[1] = -self.shearLoad / self.E / self.I * cos(Psi[0])
-        if (self.debug):
-            pass
-            #print 'first derivative  =', d[0]
-            #print 'second derivative =', d[1]
         return d
+
+    def calculateSpringConstant(self, load):
+        self.applyShearLoad(load)
+        self.calculateSlopeFunction()
+        self.calculateDisplacements()
+        self.springConstant = self.shearLoad / self.yDisplacement()
+        return self.springConstant
 
 def main():
     E = 2e6           # modulus of pdms
