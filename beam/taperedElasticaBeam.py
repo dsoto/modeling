@@ -239,6 +239,12 @@ class taperedElasticaBeam:
         print 'y displacement    =', self.yL
         print 'final angle       =', self.psiL
 
+    def calculateSpringConstant(self, load):
+        beam.applyShearLoad(load)
+        beam.calculateSlopeFunction()
+        beam.calculateDisplacements()
+        beam.springConstant = load / beam.yTipDisplacement()
+
 '''
 algorithm for finding beam profile
 
