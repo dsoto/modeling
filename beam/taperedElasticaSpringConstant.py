@@ -8,10 +8,10 @@ import taperedElasticaBeam as teb
 import scipy               as sp
 
 E = 2e6             # modulus of pdms
-t = 20e-6           # thickness of beam at base
-w = 20e-6           # width of beam at base
+t = 20.9e-6           # thickness of beam at base
+w = 24.3e-6           # width of beam at base
 I = t**3 * w / 12.0 # moment of inertia
-L = 80e-6           # length of beam
+L = 50.0e-6           # length of beam
 
 import matplotlib.pyplot as plt
 figure = plt.figure()
@@ -26,7 +26,7 @@ beam = eb.elasticaBeam()
 tbeam = teb.taperedElasticaBeam()
 
 # loop over thicknesses
-thicknessRange = sp.linspace(5e-6,20e-6,5)
+thicknessRange = sp.linspace(5e-6,25e-6,5)
 springConstant = []
 taperedSpringConstant = []
 for t1 in thicknessRange:
@@ -61,6 +61,7 @@ ax.plot(thicknessRange*1e6,springConstant,label='beam')
 ax.plot(thicknessRange*1e6,taperedSpringConstant,label='tapered beam')
 ax.set_xlabel(r'Tip Thickness ($\mu$m)')
 ax.set_ylabel(r'Lateral Spring Constant (N/m)')
+ax.grid()
 figure.suptitle('Spring Constant of Tapered and Untapered Beam')
 
 #figure.subplots_adjust(top=2)
