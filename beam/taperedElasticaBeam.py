@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+
+
 import scipy as sp
 from scipy.integrate import odeint
 from scipy.integrate import quad
@@ -46,6 +48,8 @@ class taperedElasticaBeam:
     def applyShearLoad(self, shearLoad):
         self.shearLoad = shearLoad
 
+# methods for calculation of beam profile with point load
+
     def calculateSlopeFunctionForEndAngle(self, angle):
         # this function applies a moment at the end of the
         # beam to get the end angle to be the specified angle
@@ -77,6 +81,10 @@ class taperedElasticaBeam:
         # this needs to be able to use different values for
         # the bending moment applied
         return bendingMoment / self.E / self.moment(s)
+
+
+# methods for the calculation of beam profile with
+# point load
 
     def calculateSlopeFunctionForPointLoad(self):
         self.calculateSlopeFunction()
@@ -119,6 +127,8 @@ class taperedElasticaBeam:
             print 'ending slope derivative =', self.slopeDerivative[self.numPoints-1]
         return self.slopeDerivative[self.numPoints-1]
 
+# methods for properties of beam
+
     def derivative(self, Psi, s):
         # returns the derivatives for the beam function
         if (self.debug):
@@ -157,6 +167,8 @@ class taperedElasticaBeam:
     def thickness(self, s):
         thisThickness = self.t * (1 - s / self.Lt)
         return thisThickness
+
+# methods for reporting beam profile and information
 
     def printParameters(self):
         print '-' * 50
