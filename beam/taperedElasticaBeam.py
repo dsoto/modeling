@@ -29,6 +29,7 @@ class taperedElasticaBeam:
     xL = 0
     yL = 0
     slopeCalculated = False
+    lengthInContact = 20e-6
 
 
     def __init__(self):
