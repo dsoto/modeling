@@ -49,7 +49,13 @@ class taperedElasticaBeam:
     def applyShearLoad(self, shearLoad):
         self.shearLoad = shearLoad
 
-# methods for calculation of beam profile with point load
+'''
+methods for calculation of beam profile with point moment.
+
+this is achieved by setting the angle that we want
+the end of the beam to be and then applying the proper
+moment to achieve that angle.
+'''
 
     def calculateSlopeFunctionForEndAngle(self, angle):
         # this function applies a moment at the end of the
@@ -72,21 +78,16 @@ class taperedElasticaBeam:
         # return last element of slope function
         return angle - self.slope[-1]
 
-    def addSlopeWithLength(self, slope, length):
-        # add a length of slopes to simulate the beam in side contact
-        self.lengthInContact = length
-        slopeArray = slope * sp.ones(int(self.numPoints/self.L*length))
-        self.slope = sp.hstack([self.slope, slopeArray])
-
     def derivativeForEndAngle(self, psi, s, bendingMoment):
         # this needs to be able to use different values for
         # the bending moment applied
         return bendingMoment / self.E / self.moment(s)
 
 
-# methods for the calculation of beam profile with
-# point load
-
+'''
+methods for the calculation of beam profile with point load
+applied at end of beam
+'''
     def calculateSlopeFunctionForPointLoad(self):
         self.calculateSlopeFunction()
 
@@ -128,7 +129,10 @@ class taperedElasticaBeam:
             print 'ending slope derivative =', self.slopeDerivative[self.numPoints-1]
         return self.slopeDerivative[self.numPoints-1]
 
-# methods for properties of beam
+'''
+methods for properties of beam used in solve functions.
+beam thickness, derivatives for ODE, moment of area
+'''
 
     def derivative(self, Psi, s):
         # returns the derivatives for the beam function
@@ -168,6 +172,15 @@ class taperedElasticaBeam:
     def thickness(self, s):
         thisThickness = self.t * (1 - s / self.Lt)
         return thisThickness
+
+# method to create flat length in contact for
+# plotting purposes
+
+    def addSlopeWithLength(self, slope, length):
+        # add a length of slopes to simulate the beam in side contact
+        self.lengthInContact = length
+        slopeArray = slope * sp.ones(int(self.numPoints/self.L*length))
+        self.slope = sp.hstack([self.slope, slopeArray])
 
 # methods for reporting beam profile and information
 
