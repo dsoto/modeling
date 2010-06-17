@@ -16,21 +16,27 @@ import matplotlib.pyplot as mpl
 
 
 class taperedElasticaBeam:
+    # beam physical properties
     E = 1e6              # elastic modulus of beam (Pa)
     t = 20e-6            # dimension of beam in bending direction (m)
     w = 20e-6            # width of beam (m)
     I = t**3 * w / 12.0  # moment of inertia for rectangular beam
     L = 60e-6            # length of beam (m)
     Lt = 120e-1          # length of taper (m) at Lt beam has zero thickness
+
     numPoints = 100      # number of grid points for ODE
     debug = False
-    shearLoad = 1e-6     # transverse load on beam (N)
     psiL = 0             # angle at end of beam (radians)
     xL = 0
     yL = 0
     slopeCalculated = False
     lengthInContact = 0.0
 
+
+
+    # loads or stimuli to beam
+    shearLoad = None     # transverse load on beam (Newtons)
+    endAngle  = None     # angle constraint for end of beam (radians)
 
     def __init__(self):
         pass
@@ -46,8 +52,62 @@ class taperedElasticaBeam:
     def setNumPoints(self, numPoints):
         self.numPoints = numPoints
 
-    def applyShearLoad(self, shearLoad):
+    def setShearLoad(self, shearLoad):
         self.shearLoad = shearLoad
+
+    def setEndAngle(self, endAngle):
+        self.endAngle = endAngle
+
+
+    def calculateSlopeFunction(self):
+        if ((self.shearLoad == None) and (self.endAngle == None)):
+            print 'no load or end angle specified'
+        elif ((self.shearLoad == None) and (self.endAngle != None)):
+            self.calculateSlopeFunctionForEndAngle(self.endAngle)
+        elif ((self.shearLoad != None) and (self.endAngle == None)):
+            self.calculateSlopeFunctionForPointLoad()
+        elif ((self.shearLoad != None) and (self.endAngle != None)):
+            self.calculateSlopeFunctionForBoth()
+
+    '''
+    general solution for case of both constraints
+    '''
+    def calculateSlopeFunctionForBoth(self):
+        guess = self.shearLoad * self.L / self.E / self.I
+        #guess = 90000
+        guess = 0
+        initialDerivative = fsolve(self.solveFunctionForBoth, guess)
+        if (self.debug):
+            print 'initialDerivative =', initialDerivative
+
+    def solveFunctionForBoth(self, initialDerivative):
+        # this function takes an initial derivative of the
+        # slope function, integrates the ODE and returns
+        # the derivative at the slope function at the end
+        # of the beam
+        # this function is called by calculateSlopeFunction
+        if (self.debug):
+            print 'entering solveFunction'
+        self.mesh = sp.linspace(0, self.L, self.numPoints)
+        initialCondition = zeros(2)
+        initialCondition[0] = 0
+        initialCondition[1] = initialDerivative
+        # this answer will be the slope function and its first derivative
+        answer = odeint(self.derivative, initialCondition, self.mesh)
+        # we store the slope function (the first column) as a member variable
+        self.slope = answer[:,0]
+        # we take the last element of the second column
+        # this is the change in slope at the end of the beam
+        # which should be zero
+        self.slopeDerivative = answer[:,1]
+
+        if (self.debug):
+            #print self.slope
+            print 'starting slope derivative =', self.slopeDerivative[0]
+            print 'ending slope derivative =', self.slopeDerivative[self.numPoints-1]
+
+        return self.endAngle - self.slope[-1]
+
 
     '''
     methods for calculation of beam profile with point moment.
@@ -55,10 +115,10 @@ class taperedElasticaBeam:
     this is achieved by setting the angle that we want
     the end of the beam to be and then applying the proper
     moment to achieve that angle.
-     '''
+    '''
+
 
     def calculateSlopeFunctionForEndAngle(self, angle):
-        pass
         # this function applies a moment at the end of the
         # beam to get the end angle to be the specified angle
         bendingMoment = 0
@@ -91,9 +151,6 @@ class taperedElasticaBeam:
     applied at end of beam
     '''
     def calculateSlopeFunctionForPointLoad(self):
-        self.calculateSlopeFunction()
-
-    def calculateSlopeFunction(self):
         # this function uses fsolve to find the initial derivative
         # of the slope function that will make the derivative at
         # the end of the beam zero
@@ -221,6 +278,9 @@ class taperedElasticaBeam:
         self.yL = self.y[self.numPoints-1]
 
     def plotBeam(self, ax, legendLabel):
+        self.plotBeamDisplacements(ax, legendLabel)
+
+    def plotBeamDisplacements(self, ax, legendLabel):
         scale = 1e6
         ax.plot(scale*self.x, scale*self.y, label=legendLabel)
         ax.set_xlabel('X')
@@ -277,19 +337,12 @@ class taperedElasticaBeam:
         beam.calculateDisplacements()
         beam.springConstant = load / beam.yTipDisplacement()
 
-'''
-algorithm for finding beam profile
+    '''
+    deprecated function calls
+    '''
+    def applyShearLoad(self, shearLoad):
+        self.setShearLoad(shearLoad)
 
-- guess starting value of dpsi/ds
-- calculate beam based on starting guess
-- check if beam has dpsi/ds = 0 at end of beam
-- if dpsi/ds != 0, vary starting guess
-    - can i use fsolve here by passing back the end slope?
-
-we can check the validity of these results by using a very shallow
-taper and comparing to the untapered elastica beam
-
-'''
 
 def main():
     E = 2e6           # modulus of pdms
