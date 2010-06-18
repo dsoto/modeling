@@ -2,6 +2,8 @@
 
 
 from __future__ import print_function
+import sys
+sys.path.append('..')
 import taperedElasticaBeam as teb
 import scipy               as sp
 import matplotlib          as mpl
@@ -12,7 +14,7 @@ t = 19e-6           # thickness of beam
 w = 19e-6           # width of beam
 L = 52e-6           # length of beam
 
-    
+
 def plotBeam(Lt,suffix):
 
     thisBeam = teb.taperedElasticaBeam()
@@ -27,7 +29,7 @@ def plotBeam(Lt,suffix):
     figure.set_figwidth(width)
     ax = figure.add_axes((0.1,0.4,0.8,0.55))
     ax.set_aspect('equal')
-  
+
     for i, thisLength in enumerate(lengthInContact):
         thisBeam.setBeamDimensions(L - thisLength, Lt, t, w, E)
         thisBeam.calculateSlopeFunctionForEndAngle(endAngle)
@@ -47,12 +49,12 @@ def plotBeam(Lt,suffix):
                'taper length = '+str(Lt*1e6)+' microns' +'\n'+
                datetime.now().strftime('%d %b %Y - %H:%M')+'\n'+
                os.path.abspath(__file__))
-    
+
     xPos = 0.5
     yPos = 0.05
     plt.figtext(xPos, yPos, string,
                 ha='center')
-    
+
     # name plot same as script
     fileName = os.path.basename(__file__)
     fileName = os.path.splitext(fileName)[0]
@@ -60,13 +62,13 @@ def plotBeam(Lt,suffix):
     figure.savefig(plotFileName, transparent=True)
 
 def main():
-    
+
     Lt = 1000000e-6         # length of taper
     plotBeam(Lt, '1')
-    
+
     Lt = 60e-6
     plotBeam(Lt, '2')
 
-    
+
 if __name__ == "__main__":
     main()
