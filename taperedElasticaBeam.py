@@ -51,7 +51,7 @@ class taperedElasticaBeam:
 
     '''
     methods for calculation of beam profile with point moment.
-    
+
     this is achieved by setting the angle that we want
     the end of the beam to be and then applying the proper
     moment to achieve that angle.
@@ -175,8 +175,10 @@ class taperedElasticaBeam:
         thisThickness = self.t * (1 - s / self.Lt)
         return thisThickness
 
-# method to create flat length in contact for
-# plotting purposes
+    '''
+    method to create flat length in contact for
+    plotting purposes
+    '''
 
     def addSlopeWithLength(self, slope, length):
         # add a length of slopes to simulate the beam in side contact
@@ -184,7 +186,9 @@ class taperedElasticaBeam:
         slopeArray = slope * sp.ones(int(self.numPoints/self.L*length))
         self.slope = sp.hstack([self.slope, slopeArray])
 
-# methods for reporting beam profile and information
+    '''
+    methods for reporting beam profile and information
+    '''
 
     def printParameters(self):
         print '-' * 50
