@@ -57,8 +57,8 @@ class taperedElasticaBeam:
     moment to achieve that angle.
      '''
 
-
     def calculateSlopeFunctionForEndAngle(self, angle):
+        pass
         # this function applies a moment at the end of the
         # beam to get the end angle to be the specified angle
         bendingMoment = 0
@@ -83,6 +83,7 @@ class taperedElasticaBeam:
         # this needs to be able to use different values for
         # the bending moment applied
         return bendingMoment / self.E / self.moment(s)
+
 
 
     '''
