@@ -49,13 +49,14 @@ class taperedElasticaBeam:
     def applyShearLoad(self, shearLoad):
         self.shearLoad = shearLoad
 
-'''
-methods for calculation of beam profile with point moment.
+    '''
+    methods for calculation of beam profile with point moment.
+    
+    this is achieved by setting the angle that we want
+    the end of the beam to be and then applying the proper
+    moment to achieve that angle.
+     '''
 
-this is achieved by setting the angle that we want
-the end of the beam to be and then applying the proper
-moment to achieve that angle.
-'''
 
     def calculateSlopeFunctionForEndAngle(self, angle):
         # this function applies a moment at the end of the
@@ -84,10 +85,10 @@ moment to achieve that angle.
         return bendingMoment / self.E / self.moment(s)
 
 
-'''
-methods for the calculation of beam profile with point load
-applied at end of beam
-'''
+    '''
+    methods for the calculation of beam profile with point load
+    applied at end of beam
+    '''
     def calculateSlopeFunctionForPointLoad(self):
         self.calculateSlopeFunction()
 
@@ -129,11 +130,11 @@ applied at end of beam
             print 'ending slope derivative =', self.slopeDerivative[self.numPoints-1]
         return self.slopeDerivative[self.numPoints-1]
 
-'''
-methods for properties of beam used in solve functions.
-beam thickness, derivatives for ODE, moment of area
-'''
 
+    '''
+    methods for properties of beam used in solve functions.
+    beam thickness, derivatives for ODE, moment of area
+    '''
     def derivative(self, Psi, s):
         # returns the derivatives for the beam function
         if (self.debug):
