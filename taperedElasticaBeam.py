@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-# Noe is testing changing stuff
-
 import scipy as sp
 from scipy.integrate import odeint
 from scipy.integrate import quad
@@ -32,11 +30,9 @@ class taperedElasticaBeam:
     slopeCalculated = False
     lengthInContact = 0.0
 
-
-
     # loads or stimuli to beam
-    shearLoad = None     # transverse load on beam (Newtons)
-    endAngle  = None     # angle constraint for end of beam (radians)
+    shearLoad = 0.0     # transverse load on beam (Newtons)
+    endAngle  = 0.0     # angle constraint for end of beam (radians)
 
     def __init__(self):
         pass
@@ -58,106 +54,11 @@ class taperedElasticaBeam:
     def setEndAngle(self, endAngle):
         self.endAngle = endAngle
 
-
     def calculateSlopeFunction(self):
-        if ((self.shearLoad == None) and (self.endAngle == None)):
-            print 'no load or end angle specified'
-        elif ((self.shearLoad == None) and (self.endAngle != None)):
-            self.calculateSlopeFunctionForEndAngle(self.endAngle)
-        elif ((self.shearLoad != None) and (self.endAngle == None)):
-            self.calculateSlopeFunctionForPointLoad()
-        elif ((self.shearLoad != None) and (self.endAngle != None)):
-            self.calculateSlopeFunctionForBoth()
-
-    '''
-    general solution for case of both constraints
-    '''
-    def calculateSlopeFunctionForBoth(self):
+        # starting guess for initial curvature of beam
+        # this should be tweaked if the solution converges
+        # on other valid but irrelevant profiles
         guess = self.shearLoad * self.L / self.E / self.I
-        #guess = 90000
-        guess = 0
-        initialDerivative = fsolve(self.solveFunctionForBoth, guess)
-        if (self.debug):
-            print 'initialDerivative =', initialDerivative
-
-    def solveFunctionForBoth(self, initialDerivative):
-        # this function takes an initial derivative of the
-        # slope function, integrates the ODE and returns
-        # the derivative at the slope function at the end
-        # of the beam
-        # this function is called by calculateSlopeFunction
-        if (self.debug):
-            print 'entering solveFunction'
-        self.mesh = sp.linspace(0, self.L, self.numPoints)
-        initialCondition = zeros(2)
-        initialCondition[0] = 0
-        initialCondition[1] = initialDerivative
-        # this answer will be the slope function and its first derivative
-        answer = odeint(self.derivative, initialCondition, self.mesh)
-        # we store the slope function (the first column) as a member variable
-        self.slope = answer[:,0]
-        # we take the last element of the second column
-        # this is the change in slope at the end of the beam
-        # which should be zero
-        self.slopeDerivative = answer[:,1]
-
-        if (self.debug):
-            #print self.slope
-            print 'starting slope derivative =', self.slopeDerivative[0]
-            print 'ending slope derivative =', self.slopeDerivative[self.numPoints-1]
-
-        return self.endAngle - self.slope[-1]
-
-
-    '''
-    methods for calculation of beam profile with point moment.
-
-    this is achieved by setting the angle that we want
-    the end of the beam to be and then applying the proper
-    moment to achieve that angle.
-    '''
-
-
-    def calculateSlopeFunctionForEndAngle(self, angle):
-        # this function applies a moment at the end of the
-        # beam to get the end angle to be the specified angle
-        bendingMoment = 0
-        solution = fsolve(self.solveFunctionForEndAngle,
-                          bendingMoment,
-                          args = (angle,))
-        return solution
-
-    def solveFunctionForEndAngle(self, bendingMoment, angle):
-        self.mesh = sp.linspace(0, self.L, self.numPoints)
-        initialCondition = 0
-        answer = odeint(self.derivativeForEndAngle,
-                        initialCondition,
-                        self.mesh,
-                        args = (bendingMoment,))
-
-        self.slope = answer[:,0]
-        # return last element of slope function
-        return angle - self.slope[-1]
-
-    def derivativeForEndAngle(self, psi, s, bendingMoment):
-        # this needs to be able to use different values for
-        # the bending moment applied
-        return bendingMoment / self.E / self.moment(s)
-
-
-
-    '''
-    methods for the calculation of beam profile with point load
-    applied at end of beam
-    '''
-    def calculateSlopeFunctionForPointLoad(self):
-        # this function uses fsolve to find the initial derivative
-        # of the slope function that will make the derivative at
-        # the end of the beam zero
-        #
-        # initial condition = bending moment / modulus / moment of inertia
-        guess = self.shearLoad * self.L / self.E / self.I
-        #guess = 90000
         initialDerivative = fsolve(self.solveFunction, guess)
         if (self.debug):
             print 'initialDerivative =', initialDerivative
@@ -178,16 +79,23 @@ class taperedElasticaBeam:
         answer = odeint(self.derivative, initialCondition, self.mesh)
         # we store the slope function (the first column) as a member variable
         self.slope = answer[:,0]
-        # we take the last element of the second column
-        # this is the change in slope at the end of the beam
-        # which should be zero
+        # storing the first derivative
         self.slopeDerivative = answer[:,1]
+
         if (self.debug):
             #print self.slope
             print 'starting slope derivative =', self.slopeDerivative[0]
-            print 'ending slope derivative =', self.slopeDerivative[self.numPoints-1]
-        return self.slopeDerivative[self.numPoints-1]
+            print 'ending slope derivative =', self.slopeDerivative[-1]
 
+        # depending on the inputs (load, endAngle), we choose
+        # the convergence criterion for the fsolve function
+        if (self.endAngle != 0):
+            # if endAngle is specified use end slope as boundary condition
+            return self.endAngle - self.slope[-1]
+        else:
+            # if endAngle is not specified use zero curvature at end of
+            # beam for the boundary condition
+            return self.slopeDerivative[-1]
 
     '''
     methods for properties of beam used in solve functions.
@@ -199,8 +107,6 @@ class taperedElasticaBeam:
             print 'entering derivative'
         d = zeros(2)
         d[0] = Psi[1]
-        # derivative function for normal beam
-        #d[1] = -self.shearLoad / self.E / self.I * cos(Psi[0])
         # derivative function for tapered beam
         d[1] = ( -self.shearLoad / self.E * cos(Psi[0])
                  -self.momentDerivative(s) * Psi[1]) / self.moment(s)
@@ -217,7 +123,6 @@ class taperedElasticaBeam:
             print 'arc length =', s * 1e6
         if (self.debug):
             print 'moment =', thisMoment
-        #return self.t**3 * self.w / 12.0
         return thisMoment
 
     def momentDerivative(self, s):
@@ -225,7 +130,6 @@ class taperedElasticaBeam:
         if (self.debug):
             print 'arclength =', s
             print 'moment derivative =', thisMD
-        #return 0
         return thisMD
 
     def thickness(self, s):
@@ -236,7 +140,6 @@ class taperedElasticaBeam:
     method to create flat length in contact for
     plotting purposes
     '''
-
     def addSlopeWithLength(self, slope, length):
         # add a length of slopes to simulate the beam in side contact
         self.lengthInContact = length
@@ -246,7 +149,6 @@ class taperedElasticaBeam:
     '''
     methods for reporting beam profile and information
     '''
-
     def printParameters(self):
         print '-' * 50
         print 'beam modulus      =', self.E
@@ -345,30 +247,11 @@ class taperedElasticaBeam:
 
 
 def main():
-    E = 2e6           # modulus of pdms
-    t = 19e-6           # thickness of beam
-    w = 19e-6           # width of beam
-    I = t**3 * w / 12.0 # moment of inertia
-    L = 52e-6           # length of beam
-    Lt = 100e-6         # length of taper
 
-    thisBeam = taperedElasticaBeam()
-    thisBeam.setBeamDimensions(L,Lt,t,w,E)
-    #load = 1e-5
-    #thisBeam.applyShearLoad(load)
-    thisBeam.printParameters()
-    #thisBeam.calculateSlopeFunctionForPointLoad()
-    #thisBeam.calculateDisplacements()
-    endAngle = sp.pi / 2
-    thisBeam.debug = True
-    thisBeam.calculateSlopeFunctionForEndAngle(endAngle)
-    print thisBeam.slope
-    thisBeam.calculateDisplacements()
-    figure = mpl.figure()
-    ax = figure.add_subplot(111, aspect='equal')
-    thisBeam.plotBeam(ax,'thisBeam')
-    ax.legend(loc='best')
-    mpl.show()
+    print 'importing testCode'
+    import testCode as tc
+
+    tc.allThreeTest()
 
 if __name__ == '__main__':
     main()

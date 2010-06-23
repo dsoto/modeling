@@ -73,9 +73,9 @@ def endAngleTest():
     mpl.figtext(xPos, yPos, string,
                 ha='center')
 
-    plotFileName = 'endAnglePlot.pdf'
+    ax.legend()
+    plotFileName = 'endAnglePlot-' + dateString + '.pdf'
     figure.savefig(plotFileName, transparent=True)
-
 
 def pointLoadTest():
     ##########################################################
@@ -147,7 +147,8 @@ def pointLoadTest():
     mpl.figtext(xPos, yPos, string,
                 ha='center')
 
-    plotFileName = 'pointLoadPlot.pdf'
+    ax.legend()
+    plotFileName = 'pointLoad-' + dateString + '.pdf'
     figure.savefig(plotFileName, transparent=True)
 
 def allThreeTest():
@@ -160,6 +161,7 @@ def allThreeTest():
     I = t**3 * w / 12.0 # moment of inertia
     L = 52e-6           # length of beam
 
+    dateString = datetime.now().strftime('%Y%m%d-%H%M%S')
 
     ##########################################################
     # defining figure
@@ -191,40 +193,37 @@ def allThreeTest():
 
     endAngle = sp.pi / 2
     beam.setEndAngle(endAngle)
-    beam.setShearLoad(None)
+    beam.setShearLoad(0)
     beam.calculateSlopeFunction()
     beam.calculateDisplacements()
     beam.plotBeam(ax,'angle only')
 
     shearLoad = 10e-6
     beam.setShearLoad(shearLoad)
-    beam.setEndAngle(None)
+    beam.setEndAngle(0)
     beam.calculateSlopeFunction()
     beam.calculateDisplacements()
     beam.plotBeam(ax,'shear load only')
 
     ax.legend(loc='best')
-    figure.savefig('allThree.pdf')
+    figureName = 'allThree-' + dateString + '.pdf'
+    figure.savefig(figureName)
 
 
-# begin main program
+def main():
+    # begin main program
 
-E = 2e6             # modulus of pdms
-t = 19e-6           # thickness of beam
-w = 19e-6           # width of beam
-I = t**3 * w / 12.0 # moment of inertia
-L = 52e-6           # length of beam
+    E = 2e6             # modulus of pdms
+    t = 19e-6           # thickness of beam
+    w = 19e-6           # width of beam
+    I = t**3 * w / 12.0 # moment of inertia
+    L = 52e-6           # length of beam
 
-# lets pass in the beam constants
+    dateString = datetime.now().strftime('%Y%m%d-%H%M%S')
 
+    endAngleTest()
+    pointLoadTest()
+    allThreeTest()
 
-endAngleTest()
-# maybe add end angle condition to euler beam
-# don't bother with length in contact
-
-
-pointLoadTest()
-# add point load elastica tapered and untapered to this method
-
-
-allThreeTest()
+if __name__ == '__main__':
+    main()
