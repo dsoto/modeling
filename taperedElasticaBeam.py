@@ -32,6 +32,7 @@ class taperedElasticaBeam:
 
     # loads or stimuli to beam
     shearLoad = 0.0     # transverse load on beam (Newtons)
+    axialLoad = 0.0     # axial load on beam (Newtons) negative for compressive
     endAngle  = 0.0     # angle constraint for end of beam (radians)
 
     def __init__(self):
@@ -50,6 +51,9 @@ class taperedElasticaBeam:
 
     def setShearLoad(self, shearLoad):
         self.shearLoad = shearLoad
+
+    def setAxialLoad(self, axialLoad):
+        self.axialLoad = axialLoad
 
     def setEndAngle(self, endAngle):
         self.endAngle = endAngle
@@ -108,8 +112,9 @@ class taperedElasticaBeam:
         d = zeros(2)
         d[0] = Psi[1]
         # derivative function for tapered beam
-        d[1] = ( -self.shearLoad / self.E * cos(Psi[0])
-                 -self.momentDerivative(s) * Psi[1]) / self.moment(s)
+        d[1] = (( self.axialLoad * sin(Psi[0])
+                - self.shearLoad * cos(Psi[0])) / self.E
+                - self.momentDerivative(s) * Psi[1]) / self.moment(s)
         if (self.debug):
             print 'first derivative  =', d[0]
             print 'second derivative =', d[1]
@@ -249,9 +254,11 @@ class taperedElasticaBeam:
 def main():
 
     print 'importing testCode'
+    import sys
+    sys.path.append('tests/')
     import testCode as tc
 
-    tc.allThreeTest()
+    tc.main()
 
 if __name__ == '__main__':
     main()
