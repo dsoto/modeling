@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import sys
+sys.path.append('../')
 import taperedElasticaBeam as teb
 import numpy as np
 import scipy as sp
