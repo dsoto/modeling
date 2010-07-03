@@ -165,6 +165,15 @@ class taperedElasticaBeam:
         print 'grid points       =', self.numPoints
         print '-' * 50
 
+    def calculateStrainEnergy(self):
+        # make arrays of len numpoints for moment and curvature
+        self.mesh = sp.linspace(0, self.L, self.numPoints)
+        moment = self.moment(self.mesh)
+        # dU = E I(s) (dpsi/ds)^2 / 2
+        integrand = self.E * moment * self.slopeDerivative**2 / 2.0
+        energy = trapz(integrand,self.mesh)
+        return energy
+
     def calculateDisplacements(self):
         # initialize position arrays
         self.x = sp.zeros(self.numPoints)
@@ -256,11 +265,15 @@ def main():
     print 'importing testCode'
     import sys
     sys.path.append('tests/')
-    import testCode as tc
 
+    import testCode as tc
     tc.main()
 
     import arbLoad as al
     al.main()
+
+    import strainEnergy as se
+    se.main()
+
 if __name__ == '__main__':
     main()
