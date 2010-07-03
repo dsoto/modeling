@@ -260,5 +260,7 @@ def main():
 
     tc.main()
 
+    import arbLoad as al
+    al.main()
 if __name__ == '__main__':
     main()
