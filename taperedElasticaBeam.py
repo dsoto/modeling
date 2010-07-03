@@ -266,12 +266,15 @@ def main():
     import sys
     sys.path.append('tests/')
 
+    print 'testing mark module'
     import testCode as tc
     tc.main()
 
+    print 'testing arb load module'
     import arbLoad as al
     al.main()
 
+    print 'testing straing energy module'
     import strainEnergy as se
     se.main()
 
