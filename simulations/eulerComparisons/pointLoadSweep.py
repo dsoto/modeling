@@ -8,7 +8,7 @@ sys.path.append('../')
 import taperedElasticaBeam as teb
 
 def initFigure():
-    height = 6.5
+    height = 9
     width = 6.5
     fig = mpl.figure()
     fig.set_figwidth(width)
@@ -16,6 +16,8 @@ def initFigure():
     ax = fig.add_axes((0.1,0.4,0.8,0.55))
     ax.set_aspect('equal')
     ax.grid()
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
     figDictionary = {'fig': fig, 'ax': ax}
     return figDictionary
 
@@ -28,9 +30,7 @@ def elastica(beam, pointLoad, fig, legend, color):
     beam.calculateDisplacements()
     scale = 1e6
     fig['ax'].plot(scale*beam.x, scale*beam.y, color=color)
-    fig['ax'].set_xlabel('X')
-    fig['ax'].set_ylabel('Y')
-    loadString = str(pointLoad*1e6) + 'micronewtons - elastica'
+    loadString = str(int(pointLoad*scale)) + ' $\mu$N - elastica'
     legend.append(loadString)
 
 def euler(beam, pointLoad, fig, legend, color):
@@ -39,7 +39,7 @@ def euler(beam, pointLoad, fig, legend, color):
     displacement = ((-pointLoad/(6*beam.E*beam.I))
                         * (x**3 - 3*beam.L*x**2))
     fig['ax'].plot(x*scale, displacement*scale, color)
-    loadString = str(pointLoad*1e6) + 'micronewtons - euler'
+    loadString = str(int(pointLoad*scale)) + ' $\mu$N - euler'
     legend.append(loadString)
 
 def addChartJunk(beam, figure, pointLoad, elasticaLegends, eulerLegends):
@@ -68,7 +68,7 @@ def addChartJunk(beam, figure, pointLoad, elasticaLegends, eulerLegends):
         labels.append(eulerLegends[i])
     figure['ax'].legend(labels, ncol = 2, bbox_to_anchor = (1, -.1))
 
-def saveFile(fig, pointLoad):
+def saveFile(fig):
     dateCode = datetime.now().strftime('%Y%m%d%H%M')
     plotFileName = ('pointLoadDivergence ' + dateCode + '.pdf')
     fig.savefig(plotFileName, transparent=True)
@@ -90,14 +90,16 @@ def main():
     elasticaLegends = []
     eulerLegends = []
 
-    for i, j in zip(pointLoad, range(len(pointLoad))):
-        elastica(beam=beam, pointLoad=i, fig=fig, legend=elasticaLegends, color=colors[j])
-        euler(beam=beam, pointLoad=i, fig=fig, legend=eulerLegends, color=colors[j])
+    for (index, value) in enumerate(pointLoad):
+        elastica(beam=beam, pointLoad=value, fig=fig,
+                 legend=elasticaLegends, color=colors[index])
+        euler(beam=beam, pointLoad=value, fig=fig,
+                 legend=eulerLegends, color=colors[index])
 
     addChartJunk(beam=beam, figure=fig, pointLoad=pointLoad,
                  elasticaLegends=elasticaLegends, eulerLegends=eulerLegends)
 
-    saveFile(fig=fig['fig'], pointLoad=pointLoad)
+    saveFile(fig=fig['fig'])
 
 if __name__ == '__main__':
     main()

@@ -20,6 +20,8 @@ def initFigure():
     ax.set_autoscaley_on(False)
     ax.set_aspect('equal')
     ax.grid()
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
     figDictionary = {'fig': fig, 'ax': ax}
     return figDictionary
 
@@ -32,8 +34,6 @@ def elastica(beam, endAngle, fig, legend, color):
     beam.calculateDisplacements()
     scale = 1e6
     fig['ax'].plot(scale*beam.x, scale*beam.y, color=color)
-    fig['ax'].set_xlabel('X')
-    fig['ax'].set_ylabel('Y')
     degString = str(int(round(endAngle*180/np.pi)))
     legend.append(degString +' degrees - elastica')
 
@@ -74,7 +74,7 @@ def addChartJunk(beam, figure, endAngle, elasticaLegends, eulerLegends):
 
 def saveFile(fig, endAngle, dateCode):
     degString = str(int(round(endAngle*180/np.pi)))
-    plotFileName = ('movie/endAngleDivergence ' + dateCode + ' - ' +
+    plotFileName = ('endAngleVideo/endAngleDivergence ' + dateCode + ' - ' +
     				 degString + '.png')
     fig.savefig(plotFileName, transparent=True)
 

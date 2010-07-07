@@ -20,6 +20,8 @@ def initFigure():
     ax.set_autoscaley_on(False)
     ax.set_aspect('equal')
     ax.grid()
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
     figDictionary = {'fig': fig, 'ax': ax}
     return figDictionary
 
@@ -32,9 +34,7 @@ def elastica(beam, pointLoad, fig, legend, color):
     beam.calculateDisplacements()
     scale = 1e6
     fig['ax'].plot(scale*beam.x, scale*beam.y, color=color)
-    fig['ax'].set_xlabel('X')
-    fig['ax'].set_ylabel('Y')
-    loadString = str(int(pointLoad*1e6)) + ' $\mu$N - elastica'
+    loadString = str(int(pointLoad*scale)) + ' $\mu$N - elastica'
     legend.append(loadString)
 
 
@@ -44,7 +44,7 @@ def euler(beam, pointLoad, fig, legend, color):
     displacement = ((-pointLoad/(6*beam.E*beam.I))
                         * (x**3 - 3*beam.L*x**2))
     fig['ax'].plot(x*scale, displacement*scale, color)
-    loadString = str(int(pointLoad*1e6)) + ' $\mu$N - euler'
+    loadString = str(int(pointLoad*scale)) + ' $\mu$N - euler'
     legend.append(loadString)
 
 def addChartJunk(beam, figure, pointLoad, elasticaLegends, eulerLegends):

@@ -16,6 +16,8 @@ def initFigure():
     ax = fig.add_axes((0.1,0.4,0.8,0.55))
     ax.set_aspect('equal')
     ax.grid()
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
     figDictionary = {'fig': fig, 'ax': ax}
     return figDictionary
 
@@ -28,8 +30,6 @@ def elastica(beam, endAngle, fig, legend, color):
     beam.calculateDisplacements()
     scale = 1e6
     fig['ax'].plot(scale*beam.x, scale*beam.y, color=color)
-    fig['ax'].set_xlabel('X')
-    fig['ax'].set_ylabel('Y')
     degString = str(int(round(endAngle*180/np.pi)))
     legend.append(degString +' degrees - elastica')
 
@@ -68,15 +68,14 @@ def addChartJunk(beam, figure, endAngle, elasticaLegends, eulerLegends):
         labels.append(eulerLegends[i])
     figure['ax'].legend(labels, ncol = 2, bbox_to_anchor = (1, -.1))
 
-def saveFile(fig, endAngle):
+def saveFile(fig):
     dateCode = datetime.now().strftime('%Y%m%d%H%M')
     plotFileName = ('endAngleDivergence ' + dateCode + '.pdf')
     fig.savefig(plotFileName, transparent=True)
 
-
 def main():
-    degrees = np.pi/180
-    endAngle = [40*degrees, 50*degrees, 60*degrees]
+    toRadians = np.pi/180
+    endAngleDeg = np.array([40, 50, 60], dtype=int)
 
     L = 60e-6
     Lt = 120e-1
@@ -92,14 +91,16 @@ def main():
     elasticaLegends = []
     eulerLegends = []
 
-    for i, j in zip(endAngle, range(len(endAngle))):
-        elastica(beam=beam, endAngle=i, fig=fig, legend=elasticaLegends, color=colors[j])
-        euler(beam=beam, endAngle=i, fig=fig, legend=eulerLegends, color=colors[j])
+    for (offset, value) in enumerate(endAngleDeg):
+        elastica(beam=beam, endAngle=value*toRadians, fig=fig,
+                 legend=elasticaLegends, color=colors[offset])
+        euler(beam=beam, endAngle=value*toRadians, fig=fig,
+                 legend=eulerLegends, color=colors[offset])
 
-    addChartJunk(beam=beam, figure=fig, endAngle=endAngle,
+    addChartJunk(beam=beam, figure=fig, endAngle=endAngleDeg,
                  elasticaLegends=elasticaLegends, eulerLegends=eulerLegends)
 
-    saveFile(fig=fig['fig'], endAngle=endAngle)
+    saveFile(fig=fig['fig'])
 
 if __name__ == '__main__':
     main()
