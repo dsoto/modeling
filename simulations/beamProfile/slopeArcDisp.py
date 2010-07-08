@@ -58,26 +58,29 @@ def initFig(beams):
     fig.set_figheight(figHeight)
 
     axHeight = .33
-    axWidth = .8
-    axLeft = (1 - axWidth)/2
-    axT1Bottom = 1 - axHeight - .05
+    axWidth = .33
+    firstColumnLeft = (.5 - axWidth +.05)/2
+    print firstColumnLeft
+    secondColumnLeft = (.5 + axWidth + .3)/2
+    bottom = .33
 
-    axT1 = fig.add_subplot(211)
-    axT1.set_position((axLeft, axT1Bottom, axWidth, axHeight))
+    axT1 = fig.add_axes([firstColumnLeft, bottom, axWidth, axHeight])
     axT1.set_aspect('equal')
     axT1.grid()
-    axT1.set_xlabel('X')
-    axT1.set_ylabel('Displacement')
+    axT1.set_xlabel('X', fontsize = 'small')
+    axT1.set_ylabel('Displacement', fontsize = 'small')
 
-    axB1 = fig.add_subplot(212)
-    axB1.set_position((axLeft, axT1Bottom - .1 - axHeight, axWidth, axHeight))
-    axB1.set_aspect('equal')
+    axB1 = fig.add_subplot(211)
+    mpl.subplots_adjust(left=secondColumnLeft, bottom=bottom,
+                    right=secondColumnLeft+axWidth, top=bottom+axHeight, hspace=.4)
     axB1.grid()
-    axB1.set_xlabel('X')
-    axB1.set_ylabel('Slope')
+    axB1.set_xlabel('Arc Length', fontsize = 'small')
+    axB1.set_ylabel('Slope', fontsize = 'small')
 
-    axB2 = axB1.twinx()
-    axB2.set_ylabel('Radius of Curvature (e-6)')
+    axB2 = fig.add_subplot(212)
+    axB2.grid()
+    axB2.set_xlabel('Arc Length', fontsize = 'small')
+    axB2.set_ylabel('Radius of Curvature (e-6)', fontsize = 'small')
 
     return {'fig':fig, 'axT1':axT1, 'axB1':axB1, 'axB2':axB2}
 
@@ -87,7 +90,6 @@ def plotDisp(beams, ax):
         i.calculateSlopeFunction()
         i.calculateDisplacements()
         ax.plot(scale*i.x, scale*i.y)
-    ax.legend(['tapered', 'untapered'], loc='best')
 
 def plotSlopeAndArc(beams, ax1, ax2):
     scale = 1e6
@@ -97,6 +99,9 @@ def plotSlopeAndArc(beams, ax1, ax2):
         ax1.plot(scale*x, i.slope*180/np.pi, j)
     for i,j in zip(beams, color):
         ax2.plot(scale*x, scale*1/abs(i.slopeDerivative), color=j, linestyle='-')
+    plotFont = font.FontProperties()
+    plotFont.set_size('small')
+    mpl.legend(['tapered', 'untapered'], ncol = 2, bbox_to_anchor = (-.15, -.6, .5,.2))
 
 def main():
     dimensions = setDimensions()
