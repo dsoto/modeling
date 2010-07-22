@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import scipy as sp
 from scipy.integrate import odeint
 from scipy.integrate import quad
@@ -65,7 +66,7 @@ class taperedElasticaBeam:
         guess = self.shearLoad * self.L / self.E / self.I
         initialDerivative = fsolve(self.solveFunction, guess)
         if (self.debug):
-            print 'initialDerivative =', initialDerivative
+            print('initialDerivative =', initialDerivative)
 
     def solveFunction(self, initialDerivative):
         # this function takes an initial derivative of the
@@ -74,7 +75,7 @@ class taperedElasticaBeam:
         # of the beam
         # this function is called by calculateSlopeFunction
         if (self.debug):
-            print 'entering solveFunction'
+            print('entering solveFunction')
         self.mesh = sp.linspace(0, self.L, self.numPoints)
         initialCondition = zeros(2)
         initialCondition[0] = 0
@@ -87,9 +88,9 @@ class taperedElasticaBeam:
         self.slopeDerivative = answer[:,1]
 
         if (self.debug):
-            #print self.slope
-            print 'starting slope derivative =', self.slopeDerivative[0]
-            print 'ending slope derivative =', self.slopeDerivative[-1]
+            #print(self.slope)
+            print('starting slope derivative =', self.slopeDerivative[0])
+            print('ending slope derivative =', self.slopeDerivative[-1])
 
         # depending on the inputs (load, endAngle), we choose
         # the convergence criterion for the fsolve function
@@ -108,7 +109,7 @@ class taperedElasticaBeam:
     def derivative(self, Psi, s):
         # returns the derivatives for the beam function
         if (self.debug):
-            print 'entering derivative'
+            print('entering derivative')
         d = zeros(2)
         d[0] = Psi[1]
         # derivative function for tapered beam
@@ -116,25 +117,25 @@ class taperedElasticaBeam:
                 - self.shearLoad * cos(Psi[0])) / self.E
                 - self.momentDerivative(s) * Psi[1]) / self.moment(s)
         if (self.debug):
-            print 'first derivative  =', d[0]
-            print 'second derivative =', d[1]
+            print('first derivative  =', d[0])
+            print('second derivative =', d[1])
         return d
 
     def moment(self, s):
         thisMoment = 1.0 / 12.0 * self.w * self.thickness(s)**3
         if (self.debug):
-            print 'width =', self.w * 1e6
-            print 'thickness =', self.thickness(s) * 1e6
-            print 'arc length =', s * 1e6
+            print('width =', self.w * 1e6)
+            print('thickness =', self.thickness(s) * 1e6)
+            print('arc length =', s * 1e6)
         if (self.debug):
-            print 'moment =', thisMoment
+            print('moment =', thisMoment)
         return thisMoment
 
     def momentDerivative(self, s):
         thisMD = 1.0 / 4.0 * self.w * self.thickness(s)**2 * (-self.t) / self.Lt
         if (self.debug):
-            print 'arclength =', s
-            print 'moment derivative =', thisMD
+            print('arclength =', s)
+            print('moment derivative =', thisMD)
         return thisMD
 
     def thickness(self, s):
@@ -154,16 +155,16 @@ class taperedElasticaBeam:
     '''
     methods for reporting beam profile and information
     '''
-    def printParameters(self):
-        print '-' * 50
-        print 'beam modulus      =', self.E
-        print 'beam thickness    =', self.t * 1e6
-        print 'beam width        =', self.w * 1e6
-        print 'moment of inertia =', self.I
-        print 'beam length       =', self.L * 1e6
-        print 'taper length      =', self.Lt * 1e6
-        print 'grid points       =', self.numPoints
-        print '-' * 50
+    def printParameters(self, fOut):
+        print('-' * 50,file=fOut)
+        print('beam modulus      =', self.E,file=fOut)
+        print('beam thickness    =', self.t * 1e6,file=fOut)
+        print('beam width        =', self.w * 1e6,file=fOut)
+        print('moment of inertia =', self.I,file=fOut)
+        print('beam length       =', self.L * 1e6,file=fOut)
+        print('taper length      =', self.Lt * 1e6,file=fOut)
+        print('grid points       =', self.numPoints,file=fOut)
+        print('-' * 50,file=fOut)
 
     def calculateStrainEnergy(self):
         # make arrays of len numpoints for moment and curvature
@@ -241,11 +242,13 @@ class taperedElasticaBeam:
     def setDebug(self, debug):
         self.debug = debug
 
-    def printResults(self):
-        print '-' * 50
-        print 'x displacement    =', self.xL
-        print 'y displacement    =', self.yL
-        print 'final angle       =', self.psiL
+    def printResults(self,file):
+        print('-' * 50,file=file)
+        print('x displacement    =', self.xL, file=file)
+        print('y displacement    =', self.yL, file=file)
+        print('final angle       =', self.slope[-1], file=file)
+        print('shear load        =', self.shearLoad, file=file)
+        print('axial load        =', self.axialLoad, file=file)
 
     def calculateSpringConstant(self, load):
         beam.applyShearLoad(load)
@@ -262,19 +265,19 @@ class taperedElasticaBeam:
 
 def main():
 
-    print 'importing testCode'
+    print('importing testCode')
     import sys
     sys.path.append('tests/')
 
-    print 'testing mark module'
+    print('testing mark module')
     import testCode as tc
     tc.main()
 
-    print 'testing arb load module'
+    print('testing arb load module')
     import arbLoad as al
     al.main()
 
-    print 'testing straing energy module'
+    print('testing straing energy module')
     import strainEnergy as se
     se.main()
 
