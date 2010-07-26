@@ -50,13 +50,16 @@ def setLoads(beam, angle, force):
 # using the known force normal to the cantelever, k is calculated
 # as though the beam were a linear spring.
 def calculateStiffness(beam, angle, force):
-	beam.calculateSlopeFunction()
-	beam.calculateDisplacements()
-	xTipInitial = beam.L
-	xTipFinal = beam.xTipDisplacement()
-	dx = (xTipInitial - xTipFinal)*np.cos(angle)
-	k = force/dx
-	return k
+    beam.calculateSlopeFunction()
+    beam.calculateDisplacements()
+    xTipInitial = beam.L
+    xTipFinal = beam.xTipDisplacement()
+    yTipFinal = beam.yTipDisplacement()
+    dx = (xTipInitial - xTipFinal) * np.cos(angle)
+    dy = (yTipFinal) * np.sin(angle)
+    k = force / (dx + dy)
+    print(k)
+    return k
 
 ##################################################################
 # takes the stiffness (k from previous method) and plots it on the
