@@ -12,11 +12,11 @@ import os
 
 #########################################################
 # creates a tuple of one untapered and one tapered beam.
-def createBeams(E, t, w, I, L, Lt):
+def createBeams(E, t, w, I, L, Lt, startAngle):
     untaperedBeam = teb.taperedElasticaBeam()
     taperedBeam = teb.taperedElasticaBeam()
-    taperedBeam.setBeamDimensions(L=L, Lt=Lt, t=t, w=w, E=E)
-    untaperedBeam.setBeamDimensions(L=L, Lt=1, t=t, w=w, E=E)
+    taperedBeam.setBeamDimensions(L=L, Lt=Lt, t=t, w=w, E=E, startAng=startAngle)
+    untaperedBeam.setBeamDimensions(L=L, Lt=1, t=t, w=w, E=E, startAng=startAngle)
     return (untaperedBeam, taperedBeam)
 
 #########################################################
@@ -27,7 +27,7 @@ def createFigure():
     fig = mpl.figure()
     fig.set_figheight(height)
     fig.set_figwidth(width)
-    ax = fig.add_axes((0.1,0.5,0.8,0.55))
+    ax = fig.add_axes((0.1,0.2,0.8,0.55))
     ax.set_aspect('equal')
     ax.grid()
     return (fig, ax)
@@ -37,7 +37,7 @@ def createFigure():
 # the untapered beam.
 def test(beams, condition, conditionValue, figure):
     elastica(beams, condition, conditionValue, figure)
-    euler(beams[0], condition, conditionValue, figure)
+#    euler(beams[0], condition, conditionValue, figure)
 
 #########################################################
 # solves elastica model for untapered and tapered beams
@@ -124,28 +124,34 @@ def main():
     L = 60e-6            # length of beam (m)
     Lt = 120e-6          # length of taper (m) at Lt beam has zero thickness
 
-    endAngle = np.pi/8   # end angle condition
+    startAngle = np.pi/4   # start angle condition
+    angleRange = np.pi/2   # angular range of deflection
+    endAngle = startAngle + angleRange   # end angle condition
     pointLoad = 1e-6     # point load condition
 
     endAngleTuple = ('endAngle', endAngle)
-    pointLoadTuple = ('pointLoad', pointLoad)
+#    pointLoadTuple = ('pointLoad', pointLoad)
 
-    twoTests = (endAngleTuple, pointLoadTuple)
+#    twoTests = (endAngleTuple, pointLoadTuple)
 
-    for i in twoTests:
-        condition = i
+#    for i in twoTests:
+#        condition = i
 
-        # tuple of beams (untaperedBeam, taperedBeam)
-        beams = createBeams(E=E, t=t, w=w, I=I, L=L, Lt=Lt)
+    condition = endAngleTuple
+    # tuple of beams (untaperedBeam, taperedBeam)
+    beams = createBeams(E=E, t=t, w=w, I=I, L=L, Lt=Lt, startAngle=startAngle)
 
-        # tuple of figure and axes objects (fig, ax)
-        figure = createFigure()
+    # tuple of figure and axes objects (fig, ax)
+    figure = createFigure()
 
-        # run either pointLoad test or endAngle test, depending on condition
-        test(beams = beams, condition = condition[0], conditionValue = condition[1], figure = figure)
+    # run either pointLoad test or endAngle test, depending on condition
+    test(beams = beams, condition = condition[0], conditionValue = condition[1], figure = figure)
+    figure2=mpl.figure()
+    axCurve=figure2.add_axes((0.1,0.2,0.8,0.55))
+    beams[1].plotCurvature(axCurve, 'curvs')
 
-        # passes the tapered beam
-        addChartJunk(tb = beams[1], figure = figure, condition = condition)
+    # passes the tapered beam
+#        addChartJunk(tb = beams[1], figure = figure, condition = condition)
 
 #########################################################
 if __name__ == "__main__":

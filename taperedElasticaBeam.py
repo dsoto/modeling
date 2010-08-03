@@ -22,6 +22,8 @@ class taperedElasticaBeam:
     L = 60e-6            # length of beam (m)
     Lt = 120e-1          # length of taper (m) at Lt beam has zero thickness
 
+    startAng = sp.pi/4	 # starting angle
+
     numPoints = 100      # number of grid points for ODE
     debug = False
     psiL = 0             # angle at end of beam (radians)
@@ -38,13 +40,14 @@ class taperedElasticaBeam:
     def __init__(self):
         pass
 
-    def setBeamDimensions(self, L, Lt, t, w, E):
+    def setBeamDimensions(self, L, Lt, t, w, E, startAng):
         self.L  = L
         self.Lt = Lt
         self.t  = t
         self.w  = w
         self.E  = E
         self.I  = t**3 * w / 12.0
+        self.startAngle = startAng
 
     def setNumPoints(self, numPoints):
         self.numPoints = numPoints
@@ -77,7 +80,7 @@ class taperedElasticaBeam:
             print 'entering solveFunction'
         self.mesh = sp.linspace(0, self.L, self.numPoints)
         initialCondition = zeros(2)
-        initialCondition[0] = 0
+        initialCondition[0] = self.startAng
         initialCondition[1] = initialDerivative
         # this answer will be the slope function and its first derivative
         answer = odeint(self.derivative, initialCondition, self.mesh)
