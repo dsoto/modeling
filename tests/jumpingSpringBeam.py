@@ -13,7 +13,7 @@ def initFig():
     fig = mpl.figure()
     fig.set_figheight(height)
     fig.set_figwidth(width)
-    ax = fig.add_axes((0.2,0.2,0.7,0.55))
+    ax = fig.add_axes((0.2,0.2,0.7,0.7))
     ax.set_aspect('equal')
     ax.grid()
     return (fig, ax)
@@ -21,7 +21,11 @@ def initFig():
 def calculateBeamDistance():
     loadGuess = -20
     correctLoad = fsolve(solveDist, loadGuess)
-    print('Load = ', correctLoad, ' N')
+    print('Load          = ', correctLoad, ' N     neg=compression, pos=tension')
+    strainEnergy = beam.calculateStrainEnergy()
+    print('Strain Energy =  ', strainEnergy, ' J')
+    jumpHeight = 2*strainEnergy/9.8/mass
+    print('Jump Height   = ', jumpHeight, ' m     of pure, badass hops')
     beam.plotBeam(fig[1], 'beam')
 
 def solveDist(load):
@@ -41,6 +45,7 @@ L = .25                 # length of beam (m)
 Lt = 1000               # length of taper (m) at Lt beam has zero thickness
 
 arcDistance = .25       # desired distance between two ends of the beam
+mass = .5               # mass in kg of whatever is jumping
 
 beam = teb.taperedElasticaBeam()
 beam.setBeamDimensions(L=L, Lt=1, t=t, w=w, E=E)
