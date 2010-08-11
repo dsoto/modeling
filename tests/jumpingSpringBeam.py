@@ -27,6 +27,7 @@ def calculateBeamDistance():
     jumpHeight = 2*strainEnergy/9.8/mass
     print('Jump Height   = ', jumpHeight, ' m     of pure, badass hops')
     beam.plotBeam(fig[1], 'beam')
+    fig[1].plot(-beam.x, beam.y, color='b')
 
 def solveDist(load):
     beam.setAxialLoad(load)
