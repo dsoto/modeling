@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import sys
+sys.path.append('../')
 import elasticaBeam as eb
 import scipy as sp
 
@@ -43,11 +45,11 @@ ax.set_ylabel(r'Tip Displacement ($\mu$m)')
 figure.suptitle('Elastica Beam and Euler Beam')
 ax.set_xlim((0,10.5))
 # axes.set_ylim((-0.1,1.1))
- 
+
 
 import os
 from datetime import datetime
-strings = [os.path.abspath(__file__), 
+strings = [os.path.abspath(__file__),
            datetime.now().strftime('%Y-%m-%d %H:%M'),
            'load ='+str(load),
            'length ='+str(L),

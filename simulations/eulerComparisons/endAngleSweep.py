@@ -4,7 +4,7 @@ import matplotlib.font_manager as font
 from datetime import datetime
 import os
 import sys
-sys.path.append('../')
+sys.path.append('../../')
 import taperedElasticaBeam as teb
 
 def initFigure():
