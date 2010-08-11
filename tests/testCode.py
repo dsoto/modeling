@@ -27,7 +27,7 @@ def createFigure():
     fig = mpl.figure()
     fig.set_figheight(height)
     fig.set_figwidth(width)
-    ax = fig.add_axes((0.1,0.5,0.8,0.55))
+    ax = fig.add_axes((0.1,0.3,0.8,0.55))
     ax.set_aspect('equal')
     ax.grid()
     return (fig, ax)
@@ -117,15 +117,15 @@ def addChartJunk(tb, figure, condition):
 # that the euler model is only valid for small angles of
 # deflection.
 def main():
-    E = 1e6              # elastic modulus of beam (Pa)
-    t = 20e-6            # dimension of beam in bending direction (m)
-    w = 20e-6            # width of beam (m)
+    E = 1e9              # elastic modulus of beam (Pa)
+    t = .003            # dimension of beam in bending direction (m)
+    w = .1            # width of beam (m)
     I = t**3 * w / 12.0  # moment of inertia for rectangular beam
-    L = 60e-6            # length of beam (m)
-    Lt = 120e-6          # length of taper (m) at Lt beam has zero thickness
+    L = .25            # length of beam (m)
+    Lt = 1000          # length of taper (m) at Lt beam has zero thickness
 
     endAngle = np.pi/8   # end angle condition
-    pointLoad = 1e-6     # point load condition
+    pointLoad = 10     # point load condition
 
     endAngleTuple = ('endAngle', endAngle)
     pointLoadTuple = ('pointLoad', pointLoad)

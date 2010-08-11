@@ -59,11 +59,12 @@ class taperedElasticaBeam:
     def setEndAngle(self, endAngle):
         self.endAngle = endAngle
 
-    def calculateSlopeFunction(self):
+    def calculateSlopeFunction(self, guess=0):
         # starting guess for initial curvature of beam
         # this should be tweaked if the solution converges
         # on other valid but irrelevant profiles
-        guess = self.shearLoad * self.L / self.E / self.I
+        if guess==0:
+	      	guess = self.shearLoad * self.L / self.E / self.I
         initialDerivative = fsolve(self.solveFunction, guess)
         if (self.debug):
             print('initialDerivative =', initialDerivative)
@@ -199,7 +200,8 @@ class taperedElasticaBeam:
 
     def plotBeamDisplacements(self, ax, legendLabel):
         scale = 1e6
-        ax.plot(scale*self.x, scale*self.y, label=legendLabel)
+#        ax.plot(scale*self.x, scale*self.y, label=legendLabel)
+        ax.plot(self.x, self.y, label=legendLabel)
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
 
