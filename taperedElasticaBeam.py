@@ -207,14 +207,16 @@ class taperedElasticaBeam:
 
     def plotSlope(self, ax, legendLabel):
         scale = 1e6
-        ax.plot(scale*self.mesh, self.slope, label=legendLabel)
-        ax.set_xlabel('Arc Length ($\mu$m)')
+#        ax.plot(scale*self.mesh, self.slope, label=legendLabel)
+        ax.plot(self.mesh, self.slope, label=legendLabel)
+        ax.set_xlabel('Arc Length (m)')
         ax.set_ylabel('Beam Slope (rad)')
 
     def plotCurvature(self, ax, legendLabel):
         scale = 1e6
-        ax.plot(scale*self.mesh, self.slopeDerivative, label=legendLabel)
-        ax.set_xlabel('Arc Length ($\mu$m)')
+#        ax.plot(scale*self.mesh, self.slopeDerivative, label=legendLabel)
+        ax.plot(self.mesh, self.slopeDerivative, label=legendLabel)
+        ax.set_xlabel('Arc Length (m)')
         ax.set_ylabel('Beam Curvature (m$^{-1}$)')
 
     def plotRadiusOfCurvature(self, ax, legendLabel):
